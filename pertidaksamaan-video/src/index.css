@@ -1,0 +1,20 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+/* Fix KaTeX duplicate display in headless / Webpack bundler */
+.katex-mathml {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px) !important;
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden !important;
+}
+
+/* Teks KaTeX di papan tulis */
+.katex {
+  font-size: 1.15em;
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: antialiased;
+}

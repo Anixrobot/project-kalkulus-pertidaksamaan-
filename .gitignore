@@ -1,0 +1,12 @@
+node_modules
+dist
+.DS_Store
+.env
+out
+build
+
+# Subproject ignores
+pertidaksamaan-video/node_modules
+pertidaksamaan-video/build
+pertidaksamaan-video/dist
+pertidaksamaan-video/out
