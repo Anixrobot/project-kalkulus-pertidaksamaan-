@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remotion: Pertidaksamaan Linear 1 & 2 Variabel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax untuk LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Plotly.js untuk Visualisasi -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <style>
+        html { scroll-behavior: smooth; }
+        .math-box { overflow-x: auto; padding: 0.5rem 0; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans leading-relaxed selection:bg-blue-500 selection:text-white">
+
+    <!-- Navigasi -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="font-extrabold text-xl tracking-wider text-white">
+                REMOTION<span class="text-blue-400">MATH</span>
+            </div>
+            <div class="flex gap-4 text-sm font-medium">
+                <a href="#plsv" class="hover:text-blue-400 transition">PLSV</a>
+                <a href="#pldv" class="hover:text-blue-400 transition">PLDV</a>
+                <a href="#latihan" class="hover:text-blue-400 transition">5 Contoh Soal</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto py-10 px-4 space-y-16">
+        
+        <!-- Header -->
+        <header class="text-center space-y-4">
+            <h1 class="text-4xl font-extrabold text-white">Bedah Tuntas Pertidaksamaan Linear</h1>
+            <p class="text-slate-400">Materi khusus PLSV (1 Variabel) dan PLDV (2 Variabel) lengkap dengan visualisasi grafik.</p>
+        </header>
+
+        <!-- Aturan Fundamental -->
+        <section class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <h2 class="text-xl font-bold text-rose-400 mb-3">⚠️ Aturan Mutlak Pertidaksamaan</h2>
+            <p class="text-slate-300">
+                Dalam menyelesaikan pertidaksamaan, menjumlahkan atau mengurangi angka tidak masalah. Tapi, <strong>HATI-HATI</strong> saat perkalian/pembagian:
+            </p>
+            <div class="mt-3 bg-rose-950/30 border border-rose-500/30 p-4 rounded-lg text-rose-200">
+                Jika mengali atau membagi kedua ruas dengan <strong>BILANGAN NEGATIF</strong>, maka arah tanda <strong>WAJIB DIBALIK</strong> (misal dari $<$ menjadi $>$).
+            </div>
+        </section>
+
+        <!-- Bagian PLSV -->
+        <section id="plsv" class="scroll-mt-20 space-y-6">
+            <h2 class="text-3xl font-bold border-b border-slate-700 pb-2 text-blue-400">1. Pertidaksamaan Linear Satu Variabel (PLSV)</h2>
+            <p class="text-slate-300">Hanya memiliki satu variabel ($x$) dan pangkat tertingginya 1. Tujuannya adalah mengisolasi $x$ sendirian di satu ruas.</p>
+            
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <h3 class="font-bold text-white mb-2">Contoh Visualisasi PLSV:</h3>
+                <p class="text-slate-400 text-sm mb-4">Kasus: $2x - 4 \ge 0 \implies 2x \ge 4 \implies x \ge 2$.<br>Perhatikan garis bilangan di mana solusi berada pada area berwarna hijau.</p>
+                <div id="plot-plsv" class="w-full h-64 bg-slate-950 rounded border border-slate-700"></div>
+            </div>
+        </section>
+
+        <!-- Bagian PLDV -->
+        <section id="pldv" class="scroll-mt-20 space-y-6">
+            <h2 class="text-3xl font-bold border-b border-slate-700 pb-2 text-emerald-400">2. Pertidaksamaan Linear Dua Variabel (PLDV)</h2>
+            <p class="text-slate-300">Melibatkan dua variabel ($x$ dan $y$). Solusinya adalah sebuah wilayah (Daerah Himpunan Penyelesaian / DHP) pada bidang 2D Kartesius.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <strong class="text-white">Jenis Garis:</strong>
+                    <ul class="list-disc list-inside mt-2 text-sm text-slate-400">
+                        <li>Tanda $\le$ atau $\ge$: Garis <strong>Utuh</strong></li>
+                        <li>Tanda $<$ atau $>$: Garis <strong>Putus-putus</strong></li>
+                    </ul>
+                </div>
+                <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                    <strong class="text-white">Uji Titik $(0,0)$:</strong>
+                    <p class="mt-2 text-sm text-slate-400">Substitusi $(0,0)$. Jika hasil BENAR, arsir menuju $(0,0)$. Jika SALAH, arsir menjauhi $(0,0)$.</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-white">Visualisasi Interaktif PLDV:</h3>
+                    <select id="pldv-selector" onchange="renderPLDV()" class="bg-slate-900 border border-slate-600 text-sm rounded p-1 text-white">
+                        <option value="1">Kasus 1: 2x + 5y ≤ 10</option>
+                        <option value="2">Kasus 2: 4x - 3y > 12</option>
+                    </select>
+                </div>
+                <div id="plot-pldv" class="w-full h-80 bg-slate-950 rounded border border-slate-700"></div>
+            </div>
+        </section>
+
+        <!-- 5 Contoh Soal -->
+        <section id="latihan" class="scroll-mt-20 space-y-6">
+            <h2 class="text-3xl font-bold border-b border-slate-700 pb-2 text-amber-400">3. Lima (5) Contoh Soal & Pembahasan</h2>
+            
+            <div class="space-y-4">
+                <!-- Soal 1 -->
+                <details class="group bg-slate-800 border border-slate-700 rounded-xl">
+                    <summary class="cursor-pointer font-bold p-4 text-white hover:text-amber-400 transition list-none flex justify-between">
+                        <span>Soal 1: PLSV Sederhana</span>
+                        <span class="group-open:rotate-180 transition">▼</span>
+                    </summary>
+                    <div class="p-4 pt-0 text-slate-300 border-t border-slate-700 mt-2">
+                        <p>Tentukan Himpunan Penyelesaian dari: $$3(x - 2) + 4 < 5x - 6$$</p>
+                        <div class="mt-4 p-3 bg-slate-900 rounded">
+                            <span class="text-emerald-400 font-bold block mb-2">Jawaban & Langkah:</span>
+                            $$3x - 6 + 4 < 5x - 6$$
+                            $$3x - 2 < 5x - 6$$
+                            $$3x - 5x < -6 + 2$$
+                            $$-2x < -4$$
+                            <span class="text-rose-400 text-sm block my-1">*(Dibagi dengan -2, tanda < berubah menjadi >)*</span>
+                            $$x > \frac{-4}{-2} \implies \mathbf{x > 2}$$
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Soal 2 -->
+                <details class="group bg-slate-800 border border-slate-700 rounded-xl">
+                    <summary class="cursor-pointer font-bold p-4 text-white hover:text-amber-400 transition list-none flex justify-between">
+                        <span>Soal 2: PLSV Bentuk Pecahan</span>
+                        <span class="group-open:rotate-180 transition">▼</span>
+                    </summary>
+                    <div class="p-4 pt-0 text-slate-300 border-t border-slate-700 mt-2">
+                        <p>Tentukan Himpunan Penyelesaian dari: $$\frac{2x - 1}{3} - \frac{x + 2}{2} \ge 1$$</p>
+                        <div class="mt-4 p-3 bg-slate-900 rounded">
+                            <span class="text-emerald-400 font-bold block mb-2">Jawaban & Langkah:</span>
+                            <span class="text-slate-400 text-sm">Kalikan semua ruas dengan KPK penyebut (yaitu 6):</span>
+                            $$6 \cdot \left(\frac{2x - 1}{3}\right) - 6 \cdot \left(\frac{x + 2}{2}\right) \ge 6 \cdot 1$$
+                            $$2(2x - 1) - 3(x + 2) \ge 6$$
+                            $$4x - 2 - 3x - 6 \ge 6$$
+                            $$x - 8 \ge 6 \implies \mathbf{x \ge 14}$$
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Soal 3 -->
+                <details class="group bg-slate-800 border border-slate-700 rounded-xl">
+                    <summary class="cursor-pointer font-bold p-4 text-white hover:text-amber-400 transition list-none flex justify-between">
+                        <span>Soal 3: PLDV Garis Utuh</span>
+                        <span class="group-open:rotate-180 transition">▼</span>
+                    </summary>
+                    <div class="p-4 pt-0 text-slate-300 border-t border-slate-700 mt-2">
+                        <p>Tentukan Daerah Himpunan Penyelesaian (DHP) dari: $$2x + 5y \le 10$$</p>
+                        <div class="mt-4 p-3 bg-slate-900 rounded text-sm space-y-2">
+                            <span class="text-emerald-400 font-bold block mb-2 text-base">Jawaban & Langkah:</span>
+                            <p>1. Cari Titik Potong:</p>
+                            <ul class="list-disc ml-5 text-slate-400">
+                                <li>Saat $x = 0 \implies 5y = 10 \implies y = 2 \rightarrow (0,2)$</li>
+                                <li>Saat $y = 0 \implies 2x = 10 \implies x = 5 \rightarrow (5,0)$</li>
+                            </ul>
+                            <p>2. Jenis Garis: Karena tandanya $\le$, gunakan <strong>garis utuh (solid)</strong>.</p>
+                            <p>3. Uji Titik (0,0):</p>
+                            <p class="ml-5">$$2(0) + 5(0) \le 10 \implies 0 \le 10 \quad \text{(BENAR)}$$</p>
+                            <p class="text-emerald-300 mt-2"><strong>Kesimpulan:</strong> Tarik garis dari (0,2) ke (5,0), lalu arsir daerah sebelah bawah kiri (daerah yang memuat titik 0,0).</p>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Soal 4 -->
+                <details class="group bg-slate-800 border border-slate-700 rounded-xl">
+                    <summary class="cursor-pointer font-bold p-4 text-white hover:text-amber-400 transition list-none flex justify-between">
+                        <span>Soal 4: PLDV Garis Putus-putus</span>
+                        <span class="group-open:rotate-180 transition">▼</span>
+                    </summary>
+                    <div class="p-4 pt-0 text-slate-300 border-t border-slate-700 mt-2">
+                        <p>Tentukan Daerah Himpunan Penyelesaian (DHP) dari: $$4x - 3y > 12$$</p>
+                        <div class="mt-4 p-3 bg-slate-900 rounded text-sm space-y-2">
+                            <span class="text-emerald-400 font-bold block mb-2 text-base">Jawaban & Langkah:</span>
+                            <p>1. Cari Titik Potong:</p>
+                            <ul class="list-disc ml-5 text-slate-400">
+                                <li>Saat $x = 0 \implies -3y = 12 \implies y = -4 \rightarrow (0,-4)$</li>
+                                <li>Saat $y = 0 \implies 4x = 12 \implies x = 3 \rightarrow (3,0)$</li>
+                            </ul>
+                            <p>2. Jenis Garis: Karena tandanya $>$, gunakan <strong>garis putus-putus (dashed)</strong>.</p>
+                            <p>3. Uji Titik (0,0):</p>
+                            <p class="ml-5">$$4(0) - 3(0) > 12 \implies 0 > 12 \quad \text{(SALAH)}$$</p>
+                            <p class="text-emerald-300 mt-2"><strong>Kesimpulan:</strong> Tarik garis putus-putus dari (0,-4) ke (3,0), lalu arsir daerah sebelah kanan bawah (berlawanan/menjauhi titik 0,0).</p>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Soal 5 -->
+                <details class="group bg-slate-800 border border-slate-700 rounded-xl">
+                    <summary class="cursor-pointer font-bold p-4 text-white hover:text-amber-400 transition list-none flex justify-between">
+                        <span>Soal 5: Aplikasi Sistem PLDV</span>
+                        <span class="group-open:rotate-180 transition">▼</span>
+                    </summary>
+                    <div class="p-4 pt-0 text-slate-300 border-t border-slate-700 mt-2">
+                        <p>Tentukan Daerah Himpunan Penyelesaian (DHP) dari sistem pertidaksamaan: $$x + y \ge 4; \quad x \ge 0; \quad y \ge 0$$</p>
+                        <div class="mt-4 p-3 bg-slate-900 rounded text-sm space-y-2">
+                            <span class="text-emerald-400 font-bold block mb-2 text-base">Jawaban & Langkah:</span>
+                            <p>Syarat tambahan $x \ge 0$ dan $y \ge 0$ artinya arsiran penyelesaian final HANYA boleh berada di <strong>Kuadran I (kanan atas)</strong>.</p>
+                            <p>1. Titik Potong Garis $x + y = 4$:</p>
+                            <ul class="list-disc ml-5 text-slate-400">
+                                <li>Sumbu Y $\rightarrow (0,4)$</li>
+                                <li>Sumbu X $\rightarrow (4,0)$</li>
+                            </ul>
+                            <p>2. Uji Titik (0,0) untuk $x + y \ge 4$:</p>
+                            <p class="ml-5">$$0 + 0 \ge 4 \implies 0 \ge 4 \quad \text{(SALAH)}$$</p>
+                            <p class="text-emerald-300 mt-2"><strong>Kesimpulan:</strong> DHP adalah daerah di atas garis utuh yang menghubungkan (0,4) dan (4,0), tetapi hanya terbatas di dalam area kuadran I.</p>
+                        </div>
+                    </div>
+                </details>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- Script Plotly -->
+    <script>
+        const layoutBase = {
+            paper_bgcolor: '#0f172a', plot_bgcolor: '#0f172a',
+            font: { color: '#cbd5e1' },
+            margin: { l: 40, r: 20, t: 40, b: 40 },
+            xaxis: { gridcolor: '#1e293b', zerolinecolor: '#64748b' },
+            yaxis: { gridcolor: '#1e293b', zerolinecolor: '#64748b' }
+        };
+
+        function renderPLSV() {
+            const traceHP = { x: [2, 6, 6, 2], y: [-2, -2, 2, 2], fill: 'toself', fillcolor: 'rgba(52, 211, 153, 0.2)', line: { color: 'transparent' }, name: 'x ≥ 2', hoverinfo: 'none' };
+            const traceLine = { x: [-1, 6], y: [0, 0], mode: 'lines+markers', line: { color: '#10b981', width: 4 }, marker: { size: [0, 10], color: '#10b981' }, name: 'Garis Bilangan' };
+            const layout = { ...layoutBase, title: 'Grafik PLSV: 2x - 4 ≥ 0 (Solusi: x ≥ 2)', xaxis: { range: [-1, 6] }, yaxis: { range: [-1, 1], showticklabels: false } };
+            Plotly.newPlot('plot-plsv', [traceHP, traceLine], layout, { responsive: true });
+        }
+
+        function renderPLDV() {
+            const val = document.getElementById('pldv-selector').value;
+            let traces = [];
+            let layout = { ...layoutBase };
+
+            if (val === '1') {
+                // 2x + 5y <= 10
+                traces = [
+                    { x: [-1, 5, -1, -1], y: [2.4, 0, -1, -1], fill: 'toself', fillcolor: 'rgba(56, 189, 248, 0.2)', line: { color: 'transparent' }, name: 'Daerah HP', hoverinfo: 'none' },
+                    { x: [-1, 6], y: [2.4, -0.4], mode: 'lines+markers', line: { color: '#38bdf8', width: 3 }, marker: { size: 8 }, name: '2x + 5y = 10' },
+                    { x: [0], y: [0], mode: 'markers+text', text: ['Uji (0,0) ✅'], textposition: 'bottom left', marker: { size: 10, color: '#10b981' }, name: 'Uji Titik' }
+                ];
+                layout.title = '2x + 5y ≤ 10 (Garis Utuh, Arsir ke 0,0)';
+                layout.xaxis.range = [-2, 7];
+                layout.yaxis.range = [-2, 4];
+            } else {
+                // 4x - 3y > 12 -> y < (4/3)x - 4
+                traces = [
+                    { x: [3, 8, 8, 3], y: [0, 6.66, -6, -6], fill: 'toself', fillcolor: 'rgba(244, 63, 94, 0.2)', line: { color: 'transparent' }, name: 'Daerah HP', hoverinfo: 'none' },
+                    { x: [0, 6], y: [-4, 4], mode: 'lines+markers', line: { color: '#f43f5e', width: 3, dash: 'dash' }, marker: { size: 8 }, name: '4x - 3y = 12' },
+                    { x: [0], y: [0], mode: 'markers+text', text: ['Uji (0,0) ❌'], textposition: 'top left', marker: { size: 10, color: '#fbbf24' }, name: 'Uji Titik' }
+                ];
+                layout.title = '4x - 3y > 12 (Garis Putus-putus, Arsir menjauhi 0,0)';
+                layout.xaxis.range = [-2, 7];
+                layout.yaxis.range = [-6, 5];
+            }
+            Plotly.newPlot('plot-pldv', traces, layout, { responsive: true });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPLSV();
+            renderPLDV();
+        });
+    </script>
+</body>
+</html>

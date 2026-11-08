@@ -1,0 +1,17 @@
+{
+  "name": "project-kalkulus",
+  "version": "1.0.0",
+  "description": "Workspace Root untuk Proyek Video Pembelajaran Kalkulus Pertidaksamaan",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix pertidaksamaan-video start",
+    "dev": "npm --prefix pertidaksamaan-video run dev",
+    "build": "npm --prefix pertidaksamaan-video run build",
+    "render:scenes": "npm --prefix pertidaksamaan-video run render:scenes",
+    "render:part1": "npm --prefix pertidaksamaan-video run render:part1",
+    "render:part2": "npm --prefix pertidaksamaan-video run render:part2",
+    "render:part3": "npm --prefix pertidaksamaan-video run render:part3",
+    "render:part4": "npm --prefix pertidaksamaan-video run render:part4",
+    "merge:youtube": "npm --prefix pertidaksamaan-video run merge:youtube"
+  }
+}

@@ -1,168 +1,253 @@
 import React, { memo } from "react";
-import { interpolate, useCurrentFrame } from "remotion";
 
-interface NumberLineProps {
-  min: number;
-  max: number;
-  points: {
-    value: number;
-    label?: string;
-    isClosed?: boolean;
-  }[];
-  intervals?: {
-    start?: number;
-    end?: number;
-    sign: "+" | "-";
-    isSolution?: boolean;
-  }[];
-  testPoint?: {
-    value: number;
-    result: string;
-  };
+export interface NumberLinePoint {
+  value: number;
+  label: string;
+  isClosed: boolean;
 }
 
-export const NumberLine: React.FC<NumberLineProps> = memo(({
-  min = -3,
-  max = 3,
-  points,
-  intervals = [],
-  testPoint,
-}) => {
-  const frame = useCurrentFrame();
+export interface NumberLineShade {
+  from: number;
+  to: number;
+  label?: string;
+}
 
-  const width = 800;
-  const height = 130;
+export interface NumberLineSign {
+  at: number;
+  sign: "+" | "-";
+}
+
+export interface NumberLineConfig {
+  min: number;
+  max: number;
+  points: NumberLinePoint[];
+  shades?: NumberLineShade[];
+  signs?: NumberLineSign[];
+  caption?: string;
+}
+
+export interface NumberLineProps {
+  config?: NumberLineConfig;
+  min?: number;
+  max?: number;
+  points?: NumberLinePoint[];
+  shades?: NumberLineShade[];
+  signs?: NumberLineSign[];
+  intervals?: any;
+  caption?: string;
+  className?: string;
+}
+
+export const NumberLine: React.FC<NumberLineProps> = memo((props) => {
+  // Dukung format config terbungkus maupun props datar langsung
+  const min = props.config?.min ?? props.min ?? -5;
+  const max = props.config?.max ?? props.max ?? 5;
+  const points = props.config?.points ?? props.points ?? [];
+  const shades = props.config?.shades ?? props.shades ?? [];
+  const signs = props.config?.signs ?? props.signs ?? [];
+  const caption = props.config?.caption ?? props.caption;
+  const className = props.className ?? "";
+
+  const range = max - min || 1;
+
+  // Dimensi SVG
+  const svgWidth = 840;
+  const svgHeight = 150;
   const paddingX = 70;
-  const lineY = 80;
+  const axisY = 75;
+  const effectiveWidth = svgWidth - 2 * paddingX;
 
-  const getX = (val: number) => {
-    return paddingX + ((val - min) / (max - min)) * (width - 2 * paddingX);
+  const getX = (val: number): number => {
+    const clamped = Math.max(min, Math.min(max, val));
+    return paddingX + ((clamped - min) / range) * effectiveWidth;
   };
 
-  // Animasi garis muncul dari tengah melebar secara smooth
-  const lineProgress = interpolate(frame, [5, 25], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-  });
-
-  const ticks: number[] = [];
-  for (let i = min; i <= max; i++) {
-    ticks.push(i);
-  }
-
   return (
-    <div className="flex flex-col items-center bg-black/30 p-3 rounded-2xl border border-emerald-500/30 will-change-transform">
-      <svg width={width} height={height} className="overflow-visible font-mono" style={{ shapeRendering: "geometricPrecision" }}>
+    <div className={`w-full flex flex-col items-center justify-center p-3 ${className}`}>
+      <svg
+        viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+        className="w-full h-auto max-w-3xl overflow-visible select-none drop-shadow-lg"
+      >
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 10 5 L 0 9 z" fill="#86efac" />
+          {/* Panah Sumbu Kiri */}
+          <marker
+            id="arrow-left"
+            viewBox="0 0 10 10"
+            refX="0"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto"
+          >
+            <path d="M 10 0 L 0 5 L 10 10 z" fill="#fef08a" />
           </marker>
+          {/* Panah Sumbu Kanan */}
+          <marker
+            id="arrow-right"
+            viewBox="0 0 10 10"
+            refX="10"
+            refY="5"
+            markerWidth="7"
+            markerHeight="7"
+            orient="auto"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#fef08a" />
+          </marker>
+          {/* Pola Arsiran Hijau */}
+          <pattern
+            id="hatch-green"
+            patternUnits="userSpaceOnUse"
+            width="8"
+            height="8"
+            patternTransform="rotate(45)"
+          >
+            <line x1="0" y1="0" x2="0" y2="8" stroke="#34d399" strokeWidth="2.5" opacity="0.6" />
+          </pattern>
         </defs>
 
-        {/* Daerah Arsiran Solusi */}
-        {intervals.map((inv, idx) => {
-          if (!inv.isSolution) return null;
-          const startX = inv.start !== undefined ? getX(inv.start) : paddingX - 20;
-          const endX = inv.end !== undefined ? getX(inv.end) : width - paddingX + 20;
-          const rectW = Math.max(0, endX - startX);
-
+        {/* ── 1. Daerah Arsiran Interval HP (Shades) ── */}
+        {shades.map((shade, i) => {
+          const x1 = getX(shade.from);
+          const x2 = getX(shade.to);
+          const width = Math.max(8, x2 - x1);
           return (
-            <rect
-              key={`sol-${idx}`}
-              x={startX}
-              y={lineY - 32}
-              width={rectW * lineProgress}
-              height={32}
-              fill="rgba(52, 211, 153, 0.25)"
-              stroke="rgba(52, 211, 153, 0.6)"
-              strokeDasharray="4 4"
-            />
-          );
-        })}
-
-        {/* Garis Bilangan Utama */}
-        <line
-          x1={width / 2 - (width / 2 - paddingX + 20) * lineProgress}
-          y1={lineY}
-          x2={width / 2 + (width / 2 - paddingX + 20) * lineProgress}
-          y2={lineY}
-          stroke="#86efac"
-          strokeWidth="3"
-          markerStart="url(#arrow)"
-          markerEnd="url(#arrow)"
-        />
-
-        {/* Tick Mark & Angka */}
-        {ticks.map((t) => {
-          const x = getX(t);
-          return (
-            <g key={t} opacity={lineProgress}>
-              <line x1={x} y1={lineY - 6} x2={x} y2={lineY + 6} stroke="#86efac" strokeWidth="2" />
-              <text x={x} y={lineY + 24} fill="#d1fae5" fontSize="13" textAnchor="middle" fontWeight="bold">
-                {t}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Tanda Interval (+ atau -) */}
-        {intervals.map((inv, idx) => {
-          const leftX = inv.start !== undefined ? getX(inv.start) : paddingX;
-          const rightX = inv.end !== undefined ? getX(inv.end) : width - paddingX;
-          const midX = (leftX + rightX) / 2;
-
-          return (
-            <g key={`sign-${idx}`} opacity={lineProgress}>
-              <circle
-                cx={midX}
-                cy={lineY - 18}
-                r="12"
-                fill={inv.sign === "+" ? "rgba(34, 197, 94, 0.4)" : "rgba(239, 68, 68, 0.4)"}
-                stroke={inv.sign === "+" ? "#4ade80" : "#f87171"}
-                strokeWidth="2"
+            <g key={`shade-${i}`}>
+              <rect
+                x={x1}
+                y={axisY - 22}
+                width={width}
+                height={44}
+                rx={6}
+                fill="url(#hatch-green)"
               />
-              <text
-                x={midX}
-                y={lineY - 13}
-                fill="#ffffff"
-                fontSize="16"
-                fontWeight="black"
-                textAnchor="middle"
-              >
-                {inv.sign}
-              </text>
-            </g>
-          );
-        })}
-
-        {/* Titik Pembuat Nol (Points) */}
-        {points.map((pt, idx) => {
-          const x = getX(pt.value);
-          return (
-            <g key={`pt-${idx}`} opacity={lineProgress}>
-              <circle
-                cx={x}
-                cy={lineY}
-                r="7"
-                fill={pt.isClosed ? "#fef08a" : "#133526"}
-                stroke="#fef08a"
-                strokeWidth="3"
+              <rect
+                x={x1}
+                y={axisY - 22}
+                width={width}
+                height={44}
+                rx={6}
+                fill="#10b981"
+                opacity="0.25"
               />
-              {pt.label && (
-                <text x={x} y={lineY - 40} fill="#fef08a" fontSize="14" fontWeight="bold" textAnchor="middle">
-                  {pt.label}
+              {shade.label && (
+                <text
+                  x={x1 + width / 2}
+                  y={axisY - 30}
+                  textAnchor="middle"
+                  fill="#6ee7b7"
+                  fontSize="13"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                >
+                  {shade.label}
                 </text>
               )}
             </g>
           );
         })}
+
+        {/* ── 2. Garis Utama Sumbu Bilangan ── */}
+        <line
+          x1={paddingX - 25}
+          y1={axisY}
+          x2={svgWidth - paddingX + 25}
+          y2={axisY}
+          stroke="#fef08a"
+          strokeWidth="3.5"
+          markerStart="url(#arrow-left)"
+          markerEnd="url(#arrow-right)"
+        />
+
+        {/* ── 3. Tanda Positif (+) & Negatif (-) di Setiap Daerah Interval ── */}
+        {signs.map((s, idx) => {
+          const sx = getX(s.at);
+          const isPos = s.sign === "+";
+          return (
+            <g key={`sign-${idx}`}>
+              <circle
+                cx={sx}
+                cy={axisY + 45}
+                r={13}
+                fill={isPos ? "#065f46" : "#7f1d1d"}
+                stroke={isPos ? "#34d399" : "#f87171"}
+                strokeWidth="2"
+              />
+              <text
+                x={sx}
+                y={axisY + 50}
+                textAnchor="middle"
+                fill={isPos ? "#a7f3d0" : "#fca5a5"}
+                fontSize="16"
+                fontWeight="bold"
+                fontFamily="monospace"
+              >
+                {s.sign}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* ── 4. Titik-Titik Kritis (Bulatan Kosong vs Penuh) ── */}
+        {points.map((pt, i) => {
+          const px = getX(pt.value);
+          return (
+            <g key={`pt-${i}`}>
+              {/* Garis Tik Vertikal Sumbu */}
+              <line
+                x1={px}
+                y1={axisY - 10}
+                x2={px}
+                y2={axisY + 10}
+                stroke="#fef08a"
+                strokeWidth="2"
+              />
+
+              {/* Bulatan: Penuh jika isClosed, Kosong jika !isClosed */}
+              {pt.isClosed ? (
+                // Bulatan Penuh (<= atau >=)
+                <circle
+                  cx={px}
+                  cy={axisY}
+                  r="9"
+                  fill="#22c55e"
+                  stroke="#ffffff"
+                  strokeWidth="3"
+                  className="filter drop-shadow"
+                />
+              ) : (
+                // Bulatan Kosong (< atau > atau penyebut ≠ 0)
+                <circle
+                  cx={px}
+                  cy={axisY}
+                  r="9"
+                  fill="#0b291a"
+                  stroke="#ef4444"
+                  strokeWidth="3.5"
+                  className="filter drop-shadow"
+                />
+              )}
+
+              {/* Teks Label Angka di Bawah Bulatan */}
+              <text
+                x={px}
+                y={axisY + 28}
+                textAnchor="middle"
+                fill="#ffffff"
+                fontSize="14"
+                fontWeight="bold"
+                fontFamily="monospace"
+              >
+                {pt.label}
+              </text>
+            </g>
+          );
+        })}
       </svg>
 
-      {/* Titik Uji Info */}
-      {testPoint && (
-        <div className="mt-1 text-xs font-mono bg-yellow-950/50 border border-yellow-500/40 text-yellow-200 px-3.5 py-1 rounded-lg flex items-center gap-2">
-          <span>🔍 Titik Uji x = {testPoint.value}:</span>
-          <span className="font-bold underline">{testPoint.result}</span>
+      {/* ── Caption Keterangan ── */}
+      {caption && (
+        <div className="mt-2 text-center text-xs text-emerald-200 font-mono bg-black/40 px-4 py-1 rounded-full border border-emerald-500/30">
+          {caption}
         </div>
       )}
     </div>

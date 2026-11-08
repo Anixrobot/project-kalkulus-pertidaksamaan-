@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pertidaksamaan Nilai Mutlak</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #eff6ff;
+            --secondary: #3b82f6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --danger: #ef4444;
+            --danger-light: #fef2f2;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
+            --border: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background-color: #f1f5f9;
+            padding: 40px 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            max-width: 850px;
+            margin: 0 auto;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 35px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        h3 {
+            color: var(--dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin-bottom: 15px;
+            color: #475569;
+        }
+
+        /* Box Variasi Visual */
+        .box {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            border: 1px solid transparent;
+        }
+
+        .box-highlight {
+            background-color: var(--primary-light);
+            border-color: #bfdbfe;
+        }
+
+        .box-error {
+            background-color: var(--danger-light);
+            border-color: #fee2e2;
+        }
+
+        .box-summary {
+            background-color: var(--warning-light);
+            border-color: #fef3c7;
+        }
+
+        .box-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .box-highlight .box-title { color: #1d4ed8; }
+        .box-error .box-title { color: #b91c1c; }
+        .box-summary .box-title { color: #b45309; }
+
+        /* Tabel yang Dimodifikasi */
+        .table-responsive {
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+            padding: 14px 16px;
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            background-color: #ffffff;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) td {
+            background-color: var(--light);
+        }
+
+        /* List & Code */
+        ol, ul {
+            padding-left: 24px;
+            margin-bottom: 15px;
+            color: #475569;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        code {
+            background-color: #e2e8f0;
+            color: #0f172a;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .math-block {
+            font-family: 'Cambria', 'Times New Roman', serif;
+            font-size: 1.15rem;
+            letter-spacing: 0.05em;
+            display: block;
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Pertidaksamaan Nilai Mutlak</h1>
+
+    <!-- 1. PENGERTIAN -->
+    <h2>1. Pengertian</h2>
+    <p><b>Pertidaksamaan nilai mutlak</b> adalah kalimat matematika terbuka yang memuat variabel di dalam tanda mutlak <code>|...|</code> dan menggunakan tanda ketidaksamaan seperti <code>&lt;</code>, <code>&le;</code>, <code>&gt;</code>, atau <code>&ge;</code>. Berbeda dengan persamaan biasa, penyelesaian dari pertidaksamaan ini menghasilkan rentang nilai atau interval.</p>
+
+    <!-- 2. KONSEP DASAR -->
+    <h2>2. Konsep Dasar</h2>
+    <p>Konsep dasar nilai mutlak bersandar pada prinsip <b>jarak</b> suatu bilangan dari titik nol pada garis bilangan. Karena mengukur jarak fisik, nilai mutlak tidak pernah menghasilkan nilai negatif.</p>
+    
+    <div class="box box-highlight">
+        <div class="box-title">💡 Karakteristik Tanda Ketidaksamaan</div>
+        <ul>
+            <li><b>Tanda Kurang Dari (&lt; / &le;):</b> Menunjukkan jarak yang dekat, sehingga daerah penyelesaiannya mengumpul di tengah-tengah titik acuan.</li>
+            <li><b>Tanda Lebih Dari (&gt; / &ge;):</b> Menunjukkan jarak yang jauh, sehingga daerah penyelesaiannya memencar ke dua arah luar (kiri dan kanan).</li>
+        </ul>
+    </div>
+
+    <!-- 3. LANGKAH PENYELESAIAN -->
+    <h2>3. Langkah Penyelesaian</h2>
+    <ol>
+        <li><b>Isolasi komponen mutlak:</b> Pindahkan semua elemen angka di luar tanda mutlak ke ruas seberang hingga tanda mutlak berdiri sendiri.</li>
+        <li><b>Ubah ke bentuk aljabar linear:</b> Singkirkan tanda mutlak dengan menerapkan rumus sifat matematika yang sesuai dengan tanda ketidaksamaannya.</li>
+        <li><b>Operasikan nilai variabel:</b> Cari nilai variabel <code>x</code> melalui perhitungan aljabar biasa secara adil di semua ruas.</li>
+        <li><b>Tentukan Himpunan Penyelesaian (HP):</b> Tuliskan hasil akhir perhitungan dalam format notasi interval matematika.</li>
+    </ol>
+
+    <!-- 4. CONTOH SOAL -->
+    <h2>4. Contoh Soal</h2>
+    
+    <h3>Contoh 1: Menggunakan Tanda Kurang Dari</h3>
+    <p>Tentukan Himpunan Penyelesaian dari <code>|2x - 3| &lt; 7</code></p>
+    <div class="box box-highlight">
+        <div class="box-title">Langkah Pembahasan:</div>
+        <span class="math-block">-7 &lt; 2x - 3 &lt; 7</span>
+        <span class="math-block">-7 + 3 &lt; 2x &lt; 7 + 3 <span style="font-size:0.85rem; color:#64748b;">(Semua ruas ditambah 3)</span></span>
+        <span class="math-block">-4 &lt; 2x &lt; 10</span>
+        <span class="math-block"><b>-2 &lt; x &lt; 5</b> <span style="font-size:0.85rem; color:#64748b;">(Semua ruas dibagi 2)</span></span>
+        <br>
+        <p style="margin:0; font-weight:700;">HP = {x | -2 &lt; x &lt; 5}</p>
+    </div>
+
+    <h3>Contoh 2: Menggunakan Tanda Lebih Dari Sama Dengan</h3>
+    <p>Tentukan Himpunan Penyelesaian dari <code>|3x + 2| &ge; 8</code></p>
+    <div class="box box-highlight">
+        <div class="box-title">Langkah Pembahasan (Dipecah menjadi 2 kondisi):</div>
+        <p><b>Kondisi Pertama (Arah Kiri):</b></p>
+        <span class="math-block">3x + 2 &le; -8</span>
+        <span class="math-block">3x &le; -10 &rArr; <b>x &le; -10/3</b></span>
+        
+        <p style="margin-top:10px;"><b>Kondisi Kedua (Arah Kanan):</b></p>
+        <span class="math-block">3x + 2 &ge; 8</span>
+        <span class="math-block">3x &ge; 6 &rArr; <b>x &ge; 2</b></span>
+        <br>
+        <p style="margin:0; font-weight:700;">HP = {x | x &le; -10/3 atau x &ge; 2}</p>
+    </div>
+
+    <!-- 5. KESALAHAN YANG PERLU DIHINDARI -->
+    <h2>5. Kesalahan yang Perlu Dihindari</h2>
+    <div class="box box-error">
+        <div class="box-title">⚠️ Evaluasi Kesalahan Umum</div>
+        <ul>
+            <li><b>Mengabaikan Konstanta Negatif:</b> Jika Anda menemui soal bertipe <code>|x| &lt; -5</code>, jangan gunakan rumus penjabaran. Jarak mutlak mustahil kurang dari bilangan negatif, jadi soal ini otomatis <b>tidak memiliki penyelesaian (Himpunan Kosong)</b>.</li>
+            <li><b>Tertukar Menggunakan Rumus Sifat:</b> Jangan gunakan format rentang tengah (<code>-a &lt; x &lt; a</code>) apabila soal menggunakan lambang lebih dari (<code>&gt;</code>). Bacalah lambang ketidaksamaan secara jeli sebelum melepas tanda mutlak.</li>
+            <li><b>Lupa Membalik Tanda saat Pembagian Negatif:</b> Ketika menyelesaikan aljabar dan Anda terpaksa membagi atau mengalikan ruas dengan angka bertanda minus, <b>arah lambang wajib diputar balik</b> (contoh: <code>&lt;</code> berbalik arah menjadi <code>&gt;</code>).</li>
+        </ul>
+    </div>
+
+    <!-- 6. RINGKASAN MATERI -->
+    <h2>6. Ringkasan Materi</h2>
+    <div class="box box-summary">
+        <div class="box-title">📊 Rumus Acuan Cepat (Syarat: a &ge; 0)</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bentuk Soal</th>
+                        <th>Cara Menghilangkan Mutlak</th>
+                        <th>Visualisasi Grafik</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>|f(x)| &le; a</code></td>
+                        <td><code>-a &le; f(x) &le; a</code></td>
+                        <td>Mengumpul di tengah (Interval Tertutup)</td>
+                    </tr>
+                    <tr>
+                        <td><code>|f(x)| &lt; a</code></td>
+                        <td><code>-a &lt; f(x) &lt; a</code></td>
+                        <td>Mengumpul di tengah (Interval Terbuka)</td>

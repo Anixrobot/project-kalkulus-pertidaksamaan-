@@ -31,10 +31,17 @@
     "typescript": "5.9.3"
   },
   "scripts": {
+    "start": "remotion studio",
     "dev": "remotion studio",
     "build": "remotion bundle",
     "upgrade": "remotion upgrade",
-    "lint": "eslint src && tsc"
+    "lint": "eslint src && tsc",
+    "render:scenes": "node scripts/render-scenes.mjs",
+    "render:part1": "remotion render Part1-Linear-Rafie out/Part1_Linear_Rafie.mp4",
+    "render:part2": "remotion render Part2-Rasional-Ikhsan out/Part2_Rasional_Ikhsan.mp4",
+    "render:part3": "remotion render Part3-Irasional-Pras out/Part3_Irasional_Pras.mp4",
+    "render:part4": "remotion render Part4-Mutlak-Dimas-Closing out/Part4_Mutlak_Dimas.mp4",
+    "merge:youtube": "ffmpeg -f concat -safe 0 -i out/scenes/concat-list.txt -c copy out/FullVideo_60Menit_YouTube.mp4"
   },
   "allowScripts": {
     "esbuild": false
