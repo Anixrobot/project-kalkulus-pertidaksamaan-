@@ -1,13 +1,42 @@
 import React from 'react';
+import { interpolate } from 'remotion';
 import { SceneItem, CHARACTERS_INFO } from '../data/scenesData';
 
 export const ChalkboardVisualizer: React.FC<{
   scene: SceneItem;
   activeStepIndex: number;
   stepProgress: number;
+  frameInStep?: number;
+  framesPerStep?: number;
 }> = ({ scene, activeStepIndex, stepProgress }) => {
   const currentStep = scene.steps[activeStepIndex] || scene.steps[0];
-  const isTransitioning = stepProgress < 0.15;
+
+  // ── Efek Transisi Ganti Slide (Fade-In & Fade-Out / Menghilang & Muncul Tanpa Scroll) ──
+  // 1. Awal langkah (0.00 - 0.08): Slide & Fade-In materi baru
+  // 2. Tengah langkah (0.08 - 0.92): HOLD FRAME MURNI (Statis 100%, nyaman disimak VO tanpa gerak/scroll)
+  // 3. Akhir langkah (0.92 - 1.00): Fade-Out halus menghilang sebelum slide berikutnya muncul
+  const isTransitioning = stepProgress < 0.08 || stepProgress > 0.92;
+
+  const slideOpacity = interpolate(
+    stepProgress,
+    [0, 0.08, 0.92, 1.0],
+    [0, 1, 1, 0],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  const slideX = interpolate(
+    stepProgress,
+    [0, 0.08, 0.92, 1.0],
+    [14, 0, 0, -14],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
+
+  const slideScale = interpolate(
+    stepProgress,
+    [0, 0.08, 0.92, 1.0],
+    [0.97, 1.0, 1.0, 0.97],
+    { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+  );
 
   return (
     <div
@@ -17,13 +46,13 @@ export const ChalkboardVisualizer: React.FC<{
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        padding: '14px 20px',
+        padding: '12px 18px',
         color: '#f1f5f9',
         overflow: 'hidden',
         fontFamily: 'Inter, system-ui, sans-serif'
       }}
     >
-      {/* Efek Kapur Halus */}
+      {/* Efek Tekstur Debu Kapur Halus */}
       <div
         style={{
           position: 'absolute',
@@ -41,11 +70,12 @@ export const ChalkboardVisualizer: React.FC<{
           position: 'relative',
           zIndex: 10,
           borderBottom: '1px solid rgba(167, 243, 208, 0.25)',
-          paddingBottom: 8,
+          paddingBottom: 6,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          gap: 8
+          gap: 8,
+          flexShrink: 0
         }}
       >
         <div>
@@ -80,16 +110,16 @@ export const ChalkboardVisualizer: React.FC<{
           </div>
           <h2
             style={{
-              fontSize: 18,
+              fontSize: 17,
               fontWeight: 900,
               letterSpacing: '0.02em',
               color: '#ffffff',
-              margin: '4px 0 2px 0'
+              margin: '3px 0 1px 0'
             }}
           >
             {scene.boardTitle}
           </h2>
-          <p style={{ fontSize: 11, color: 'rgba(167, 243, 208, 0.85)', margin: 0 }}>
+          <p style={{ fontSize: 10.5, color: 'rgba(167, 243, 208, 0.85)', margin: 0 }}>
             {scene.boardSubtitle}
           </p>
         </div>
@@ -100,9 +130,9 @@ export const ChalkboardVisualizer: React.FC<{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 6,
-              padding: '4px 10px',
+              padding: '3px 9px',
               borderRadius: 999,
-              fontSize: 10,
+              fontSize: 9.5,
               fontWeight: 800,
               backgroundColor: isTransitioning ? 'rgba(251, 191, 36, 0.25)' : 'rgba(2, 44, 34, 0.9)',
               color: isTransitioning ? '#fde68a' : '#a7f3d0',
@@ -111,98 +141,41 @@ export const ChalkboardVisualizer: React.FC<{
                 : '1px solid rgba(52, 211, 153, 0.4)'
             }}
           >
-            {isTransitioning ? '✨ ANIMASI TRANSISI RUMUS' : '🔒 HOLD FRAME (STATIC VO SYNC)'}
+            {isTransitioning
+              ? stepProgress > 0.5
+                ? '💨 GANTI SLIDE'
+                : '✨ SLIDE BARU'
+              : '🔒 HOLD FRAME (VO SYNC)'}
           </span>
         </div>
       </div>
 
-      {/* ISI TENGAH PAPAN TULIS: 2 KOLOM (KIRI RUMUS & LANGKAH, KANAN DIAGRAM) */}
+      {/* ISI TENGAH PAPAN TULIS: 2 KOLOM SEIMBANG (KIRI DETAIL LANGKAH AKTIF, KANAN DIAGRAM) */}
       <div
         style={{
           position: 'relative',
           zIndex: 10,
           flex: 1,
           display: 'grid',
-          gridTemplateColumns: '5fr 5fr',
+          gridTemplateColumns: '1fr 1fr',
           gap: 14,
-          margin: '10px 0',
-          alignItems: 'center'
+          margin: '8px 0',
+          alignItems: 'center',
+          overflow: 'hidden'
         }}
       >
-        {/* KOLOM KIRI: KOTAK RUMUS KAPUR + 3 DAFTAR LANGKAH */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div
-            style={{
-              padding: 12,
-              borderRadius: 12,
-              backgroundColor: 'rgba(2, 44, 34, 0.68)',
-              border: '2px solid rgba(110, 231, 183, 0.3)',
-              opacity: Math.min(1, stepProgress * 8 + 0.25),
-              transform: `translateY(${Math.max(0, (1 - stepProgress * 6) * 8)}px)`
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 6
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#fcd34d'
-                }}
-              >
-                {currentStep.label}
-              </span>
-              <span
-                style={{
-                  padding: '2px 6px',
-                  fontSize: 9,
-                  fontWeight: 700,
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                  color: '#d1fae5'
-                }}
-              >
-                {currentStep.badge}
-              </span>
-            </div>
-
-            <div
-              style={{
-                padding: '10px 12px',
-                borderRadius: 8,
-                backgroundColor: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                fontFamily: 'Fira Code, Consolas, monospace',
-                fontSize: 13.5,
-                fontWeight: 800,
-                color: '#fde68a',
-                lineHeight: 1.45
-              }}
-            >
-              {currentStep.eq}
-            </div>
-
-            <p
-              style={{
-                marginTop: 8,
-                marginBottom: 0,
-                fontSize: 11.5,
-                color: '#ecfdf5',
-                lineHeight: 1.45
-              }}
-            >
-              {currentStep.desc}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        {/* KOLOM KIRI: INDIKATOR STEP HORIZONTAL + PEMBAHASAN AKTIF (AUTO-SCROLL) */}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            height: '100%',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Indikator Navigasi Langkah Horizontal (Mencegah Penumpukan Vertikal) */}
+          <div style={{ display: 'flex', gap: 6, marginBottom: 6, flexShrink: 0 }}>
             {scene.steps.map((st, idx) => {
               const isCurrent = idx === activeStepIndex;
               const isDone = idx < activeStepIndex;
@@ -210,62 +183,124 @@ export const ChalkboardVisualizer: React.FC<{
                 <div
                   key={idx}
                   style={{
-                    padding: '6px 10px',
-                    borderRadius: 8,
-                    fontSize: 11,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                    flex: 1,
+                    padding: '3px 6px',
+                    borderRadius: 6,
+                    fontSize: 9.5,
+                    fontWeight: 800,
+                    textAlign: 'center',
                     backgroundColor: isCurrent
-                      ? 'rgba(251, 191, 36, 0.22)'
+                      ? '#fbbf24'
                       : isDone
-                      ? 'rgba(6, 78, 59, 0.45)'
-                      : 'rgba(0,0,0,0.22)',
+                      ? 'rgba(16, 185, 129, 0.35)'
+                      : 'rgba(0,0,0,0.3)',
+                    color: isCurrent ? '#020617' : isDone ? '#a7f3d0' : 'rgba(203,213,225,0.6)',
                     border: isCurrent
-                      ? '1px solid rgba(252, 211, 77, 0.65)'
+                      ? '1px solid #f59e0b'
                       : isDone
-                      ? '1px solid rgba(16, 185, 129, 0.35)'
-                      : '1px solid rgba(255,255,255,0.1)',
-                    color: isCurrent ? '#ffffff' : isDone ? '#a7f3d0' : 'rgba(203,213,225,0.65)',
-                    fontWeight: isCurrent ? 800 : 500
+                      ? '1px solid rgba(16,185,129,0.4)'
+                      : '1px solid rgba(255,255,255,0.08)'
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 999,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 9,
-                        fontWeight: 900,
-                        backgroundColor: isCurrent
-                          ? '#fbbf24'
-                          : isDone
-                          ? '#10b981'
-                          : 'rgba(255,255,255,0.12)',
-                        color: isCurrent || isDone ? '#020617' : '#ffffff'
-                      }}
-                    >
-                      {isDone ? '✓' : idx + 1}
-                    </span>
-                    <span>{st.label}</span>
-                  </div>
-                  <span style={{ fontSize: 9.5, opacity: 0.8 }}>{st.badge}</span>
+                  {isDone ? '✓ ' : ''}
+                  {st.badge || `Langkah ${idx + 1}`}
                 </div>
               );
             })}
           </div>
+
+          {/* Kotak Detail Pembahasan Aktif dengan Transisi Ganti Slide (Tanpa Scroll) */}
+          <div
+            style={{
+              flex: 1,
+              padding: '12px 14px',
+              borderRadius: 12,
+              backgroundColor: 'rgba(2, 44, 34, 0.72)',
+              border: '2px solid rgba(110, 231, 183, 0.4)',
+              boxShadow: '0 8px 20px rgba(0,0,0,0.35)',
+              opacity: slideOpacity,
+              transform: `translateX(${slideX}px) scale(${slideScale})`,
+              transformOrigin: 'center center',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            <div>
+              {/* Header Langkah */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: 8
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    color: '#fcd34d'
+                  }}
+                >
+                  {currentStep.label}
+                </span>
+                <span
+                  style={{
+                    padding: '2px 8px',
+                    fontSize: 10,
+                    fontWeight: 800,
+                    borderRadius: 4,
+                    backgroundColor: 'rgba(16, 185, 129, 0.3)',
+                    color: '#6ee7b7',
+                    border: '1px solid rgba(52, 211, 153, 0.4)'
+                  }}
+                >
+                  {currentStep.badge}
+                </span>
+              </div>
+
+              {/* Kotak Rumus Kapur Utama */}
+              <div
+                style={{
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  border: '1.5px solid rgba(254, 240, 138, 0.35)',
+                  fontFamily: 'Fira Code, Consolas, monospace',
+                  fontSize: 13.5,
+                  fontWeight: 800,
+                  color: '#fde68a',
+                  lineHeight: 1.45,
+                  marginBottom: 8,
+                  boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.5)'
+                }}
+              >
+                {currentStep.eq}
+              </div>
+
+              {/* Penjelasan Langkah & Tips Penting */}
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 11.5,
+                  color: '#ecfdf5',
+                  lineHeight: 1.5,
+                  fontWeight: 500
+                }}
+              >
+                {currentStep.desc}
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* KOLOM KANAN: GARIS BILANGAN / KARTESIUS / TABEL UJI TANDA */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        {/* KOLOM KANAN: GARIS BILANGAN / KARTESIUS / TABEL UJI TANDA (PROPORSIONAL & PAS) */}
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
           {scene.visualType === 'number-line' && scene.numberLineConfig && (
             <div
               style={{
-                padding: 12,
+                padding: 10,
                 borderRadius: 12,
                 backgroundColor: 'rgba(2, 6, 23, 0.72)',
                 border: '1px solid rgba(52, 211, 153, 0.35)'
@@ -273,7 +308,7 @@ export const ChalkboardVisualizer: React.FC<{
             >
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: 800,
                   color: '#6ee7b7',
                   marginBottom: 6,
@@ -281,10 +316,10 @@ export const ChalkboardVisualizer: React.FC<{
                   justifyContent: 'space-between'
                 }}
               >
-                <span>VISUALISASI GARIS BILANGAN & UJI TANDA</span>
-                <span style={{ fontSize: 10, color: '#fcd34d' }}>○ Terbuka | ● Tertutup</span>
+                <span>GARIS BILANGAN & INTERVAL HP</span>
+                <span style={{ fontSize: 9.5, color: '#fcd34d' }}>○ Terbuka | ● Tertutup</span>
               </div>
-              <svg viewBox="0 0 420 120" style={{ width: '100%', height: 112, overflow: 'visible' }}>
+              <svg viewBox="0 0 420 120" style={{ width: '100%', height: 110, overflow: 'visible' }}>
                 {scene.numberLineConfig.shades.map((sh, i) => {
                   const mapX = (val: number) => 210 + val * 28;
                   const x1 = Math.max(25, Math.min(395, mapX(sh.from)));
@@ -329,17 +364,17 @@ export const ChalkboardVisualizer: React.FC<{
                       <circle
                         cx="0"
                         cy="0"
-                        r="11"
+                        r="10"
                         fill={isPos ? 'rgba(16,185,129,0.25)' : 'rgba(244,63,94,0.25)'}
                         stroke={isPos ? '#34d399' : '#fb7185'}
                         strokeWidth="1.5"
                       />
                       <text
                         x="0"
-                        y="4"
+                        y="3.5"
                         textAnchor="middle"
                         fill={isPos ? '#6ee7b7' : '#fda4af'}
-                        fontSize="13"
+                        fontSize="12"
                         fontWeight="900"
                       >
                         {sg.sign}
@@ -355,17 +390,17 @@ export const ChalkboardVisualizer: React.FC<{
                       <circle
                         cx="0"
                         cy="0"
-                        r="7"
+                        r="6.5"
                         fill={pt.filled ? '#fbbf24' : '#064e3b'}
                         stroke="#fbbf24"
-                        strokeWidth="3"
+                        strokeWidth="2.5"
                       />
                       <text
                         x="0"
-                        y="25"
+                        y="23"
                         textAnchor="middle"
                         fill="#fde68a"
-                        fontSize="11"
+                        fontSize="10.5"
                         fontWeight="bold"
                       >
                         {pt.label}
@@ -377,7 +412,7 @@ export const ChalkboardVisualizer: React.FC<{
               <div
                 style={{
                   marginTop: 4,
-                  fontSize: 10.5,
+                  fontSize: 10,
                   textAlign: 'center',
                   color: '#a7f3d0',
                   fontWeight: 700,
@@ -395,7 +430,7 @@ export const ChalkboardVisualizer: React.FC<{
           {scene.visualType === 'cartesian-pldv' && scene.cartesianConfig && (
             <div
               style={{
-                padding: 12,
+                padding: 10,
                 borderRadius: 12,
                 backgroundColor: 'rgba(2, 6, 23, 0.72)',
                 border: '1px solid rgba(52, 211, 153, 0.35)'
@@ -403,7 +438,7 @@ export const ChalkboardVisualizer: React.FC<{
             >
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: 800,
                   color: '#6ee7b7',
                   marginBottom: 6,
@@ -411,14 +446,14 @@ export const ChalkboardVisualizer: React.FC<{
                   justifyContent: 'space-between'
                 }}
               >
-                <span>BIDANG KARTESIUS 2D (DAERAH HIMPUNAN PENYELESAIAN)</span>
-                <span style={{ color: '#fcd34d', fontSize: 10 }}>{scene.cartesianConfig.equation}</span>
+                <span>GRAFIK KARTESIUS 2D (DHP)</span>
+                <span style={{ color: '#fcd34d', fontSize: 9.5 }}>{scene.cartesianConfig.equation}</span>
               </div>
               <svg
                 viewBox="0 0 360 175"
                 style={{
                   width: '100%',
-                  height: 140,
+                  height: 135,
                   backgroundColor: 'rgba(15, 23, 42, 0.92)',
                   borderRadius: 8,
                   border: '1px solid #334155'
@@ -464,7 +499,7 @@ export const ChalkboardVisualizer: React.FC<{
                   </>
                 )}
               </svg>
-              <div style={{ marginTop: 6, fontSize: 10.5, textAlign: 'center', color: '#fde68a', fontWeight: 700 }}>
+              <div style={{ marginTop: 4, fontSize: 10, textAlign: 'center', color: '#fde68a', fontWeight: 700 }}>
                 {scene.cartesianConfig.testText}
               </div>
             </div>
@@ -473,7 +508,7 @@ export const ChalkboardVisualizer: React.FC<{
           {scene.visualType === 'sign-table' && (
             <div
               style={{
-                padding: 12,
+                padding: 10,
                 borderRadius: 12,
                 backgroundColor: 'rgba(2, 6, 23, 0.72)',
                 border: '1px solid rgba(52, 211, 153, 0.35)'
@@ -481,45 +516,45 @@ export const ChalkboardVisualizer: React.FC<{
             >
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: 800,
                   color: '#6ee7b7',
-                  marginBottom: 8,
+                  marginBottom: 6,
                   display: 'flex',
                   justifyContent: 'space-between'
                 }}
               >
-                <span>TABEL UJI TANDA PECAHAN RASIONAL f(x)/g(x)</span>
-                <span style={{ fontSize: 10, color: '#fda4af', fontWeight: 900 }}>Syarat Mutlak: g(x) ≠ 0</span>
+                <span>TABEL UJI TANDA f(x)/g(x)</span>
+                <span style={{ fontSize: 9.5, color: '#fda4af', fontWeight: 900 }}>Syarat: g(x) ≠ 0</span>
               </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
                 <thead>
                   <tr style={{ backgroundColor: 'rgba(6, 78, 59, 0.85)', color: '#d1fae5', textAlign: 'left' }}>
-                    <th style={{ padding: 7 }}>Pembilang f(x)</th>
-                    <th style={{ padding: 7 }}>Penyebut g(x)</th>
-                    <th style={{ padding: 7 }}>Hasil f(x)/g(x)</th>
+                    <th style={{ padding: 6 }}>Pembilang f(x)</th>
+                    <th style={{ padding: 6 }}>Penyebut g(x)</th>
+                    <th style={{ padding: 6 }}>Hasil f(x)/g(x)</th>
                   </tr>
                 </thead>
                 <tbody style={{ backgroundColor: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>
                   <tr>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#6ee7b7' }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#6ee7b7' }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#fda4af' }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#fda4af' }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#6ee7b7' }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#fda4af' }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#fda4af' }}>Negatif (−)</td>
+                    <td style={{ padding: 5, color: '#6ee7b7' }}>Positif (+)</td>
+                    <td style={{ padding: 5, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
                   </tr>
                 </tbody>
               </table>
@@ -529,7 +564,7 @@ export const ChalkboardVisualizer: React.FC<{
           {scene.visualType === 'mutlak-table' && (
             <div
               style={{
-                padding: 12,
+                padding: 10,
                 borderRadius: 12,
                 backgroundColor: 'rgba(2, 6, 23, 0.72)',
                 border: '1px solid rgba(52, 211, 153, 0.35)'
@@ -537,45 +572,45 @@ export const ChalkboardVisualizer: React.FC<{
             >
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 10.5,
                   fontWeight: 800,
                   color: '#fcd34d',
-                  marginBottom: 8,
+                  marginBottom: 6,
                   display: 'flex',
                   justifyContent: 'space-between'
                 }}
               >
-                <span>TABEL RUMUS ACUAN CEPAT NILAI MUTLAK (Syarat: a ≥ 0)</span>
-                <span style={{ fontSize: 10, color: '#6ee7b7' }}>Prinsip Jarak ≥ 0</span>
+                <span>RUMUS CEPAT NILAI MUTLAK (a ≥ 0)</span>
+                <span style={{ fontSize: 9.5, color: '#6ee7b7' }}>Prinsip Jarak ≥ 0</span>
               </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 10.5 }}>
                 <thead>
                   <tr style={{ backgroundColor: 'rgba(6, 78, 59, 0.85)', color: '#ffffff', textAlign: 'left' }}>
-                    <th style={{ padding: 6 }}>Bentuk Soal</th>
-                    <th style={{ padding: 6 }}>Sifat Aljabar</th>
-                    <th style={{ padding: 6 }}>Visualisasi Grafik</th>
+                    <th style={{ padding: 5 }}>Bentuk Soal</th>
+                    <th style={{ padding: 5 }}>Sifat Aljabar</th>
+                    <th style={{ padding: 5 }}>Sifat Interval</th>
                   </tr>
                 </thead>
                 <tbody style={{ backgroundColor: 'rgba(0,0,0,0.35)', fontWeight: 600 }}>
                   <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &lt; a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>−a &lt; f(x) &lt; a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Mengumpul di tengah (Terbuka)</td>
+                    <td style={{ padding: 5, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &lt; a</td>
+                    <td style={{ padding: 5, color: '#a7f3d0', fontFamily: 'monospace' }}>−a &lt; f(x) &lt; a</td>
+                    <td style={{ padding: 5, color: '#e2e8f0' }}>Mengumpul (Tengah)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≤ a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>−a ≤ f(x) ≤ a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Mengumpul di tengah (Tertutup)</td>
+                    <td style={{ padding: 5, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≤ a</td>
+                    <td style={{ padding: 5, color: '#a7f3d0', fontFamily: 'monospace' }}>−a ≤ f(x) ≤ a</td>
+                    <td style={{ padding: 5, color: '#e2e8f0' }}>Mengumpul (Tertutup)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &gt; a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) &lt; −a ∪ f(x) &gt; a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Memencar kiri & kanan (Terbuka)</td>
+                    <td style={{ padding: 5, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &gt; a</td>
+                    <td style={{ padding: 5, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) &lt; −a ∪ &gt; a</td>
+                    <td style={{ padding: 5, color: '#e2e8f0' }}>Memencar (Kiri-Kanan)</td>
                   </tr>
                   <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≥ a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) ≤ −a ∪ f(x) ≥ a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Memencar kiri & kanan (Tertutup)</td>
+                    <td style={{ padding: 5, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≥ a</td>
+                    <td style={{ padding: 5, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) ≤ −a ∪ ≥ a</td>
+                    <td style={{ padding: 5, color: '#e2e8f0' }}>Memencar (Tertutup)</td>
                   </tr>
                 </tbody>
               </table>
@@ -587,38 +622,38 @@ export const ChalkboardVisualizer: React.FC<{
             scene.visualType === 'summary-master') && (
             <div
               style={{
-                padding: 12,
+                padding: 10,
                 borderRadius: 12,
                 backgroundColor: 'rgba(2, 6, 23, 0.72)',
                 border: '1px solid rgba(52, 211, 153, 0.35)'
               }}
             >
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#fcd34d', marginBottom: 8 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 900, color: '#fcd34d', marginBottom: 6 }}>
                 MATRIKS 4 CABANG UTAMA PERTIDAKSAMAAN (60 MENIT)
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 11 }}>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, fontSize: 10.5 }}>
+                <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
                   <div style={{ fontWeight: 900, color: '#93c5fd' }}>1. Linear (Rafie)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    PLSV Garis Bilangan & PLDV Uji Titik (0,0). Kali/bagi negatif balik tanda!
+                  <div style={{ fontSize: 10, color: '#e2e8f0', marginTop: 1 }}>
+                    PLSV Garis Bilangan & PLDV Uji (0,0). Kali/bagi negatif balik tanda!
                   </div>
                 </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
                   <div style={{ fontWeight: 900, color: '#6ee7b7' }}>2. Rasional (Ikhsan)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Pecahan f(x)/g(x) dengan syarat mutlak penyebut g(x) ≠ 0 & dilarang kali silang.
+                  <div style={{ fontSize: 10, color: '#e2e8f0', marginTop: 1 }}>
+                    Pecahan f(x)/g(x) dengan syarat mutlak g(x) ≠ 0 & dilarang kali silang.
                   </div>
                 </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
                   <div style={{ fontWeight: 900, color: '#fcd34d' }}>3. Irasional (Pras)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Bentuk akar √f(x) wajib memenuhi Syarat Numerus f(x) ≥ 0 & irisan (∩) solusi.
+                  <div style={{ fontSize: 10, color: '#e2e8f0', marginTop: 1 }}>
+                    Akar √f(x) wajib syarat numerus f(x) ≥ 0 & irisan (∩) solusi.
                   </div>
                 </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
+                <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
                   <div style={{ fontWeight: 900, color: '#f9a8d4' }}>4. Nilai Mutlak (Dimas)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Konsep jarak |x| ≥ 0: tanda &lt; mengumpul di tengah, tanda &gt; memencar kiri-kanan.
+                  <div style={{ fontSize: 10, color: '#e2e8f0', marginTop: 1 }}>
+                    Jarak |x| ≥ 0: tanda &lt; mengumpul di tengah, &gt; memencar kiri-kanan.
                   </div>
                 </div>
               </div>
@@ -632,20 +667,21 @@ export const ChalkboardVisualizer: React.FC<{
         style={{
           position: 'relative',
           zIndex: 10,
-          paddingTop: 6,
+          paddingTop: 4,
           borderTop: '1px solid rgba(167, 243, 208, 0.2)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          fontSize: 10.5,
-          color: 'rgba(167, 243, 208, 0.9)'
+          fontSize: 10,
+          color: 'rgba(167, 243, 208, 0.9)',
+          flexShrink: 0
         }}
       >
         <span>
-          Rentang Waktu Segmen: <strong>Menit {scene.startMin.toFixed(1)} – {scene.endMin.toFixed(1)}</strong>
+          Rentang Waktu: <strong>Menit {scene.startMin.toFixed(1)} – {scene.endMin.toFixed(1)}</strong>
         </span>
         <span style={{ fontFamily: 'monospace' }}>
-          Pemateri Aktif:{' '}
+          Pemateri:{' '}
           <strong style={{ color: '#fcd34d', textTransform: 'uppercase' }}>
             {scene.presenter === 'all'
               ? 'SELURUH TIM (4 PEMATERI)'

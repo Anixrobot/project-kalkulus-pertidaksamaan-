@@ -1,4 +1,5 @@
 import React from 'react';
+import './index.css';
 import { Composition, Folder } from 'remotion';
 import { SCENES_DATA, FPS, TOTAL_FRAMES } from './data/scenesData';
 import { ClassroomStage } from './components/ClassroomStage';

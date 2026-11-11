@@ -1,248 +1,710 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { memo } from "react";
 import {
   useCurrentFrame,
   useVideoConfig,
-  staticFile,
-  delayRender,
-  continueRender,
   interpolate,
 } from "remotion";
-import { Lottie, LottieAnimationData } from "@remotion/lottie";
 
-export const ClassroomAudience: React.FC = memo(() => {
+export const ClassroomAudience: React.FC<{ durationInFrames?: number }> = memo(({ durationInFrames }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames: videoDuration } = useVideoConfig();
+  const totalDuration = durationInFrames || videoDuration;
 
-  // Handle Lottie students.json jika disediakan per PRD §5 [Scene 01]
-  const [lottieData, setLottieData] = useState<LottieAnimationData | null>(null);
+  // Animasi nafas halus murid & gerakan menulis catatan
+  const breathe1 = Math.sin((frame / fps) * Math.PI * 1.8) * 1.8;
+  const breathe2 = Math.sin(((frame + 15) / fps) * Math.PI * 1.6) * 1.6;
+  const breathe3 = Math.sin(((frame + 30) / fps) * Math.PI * 2.0) * 1.5;
+  const writingMotion = Math.sin((frame / fps) * Math.PI * 4) * 1.2;
 
-  useEffect(() => {
-    const fileName = "students.json";
-    const handle = delayRender("Loading students.json Lottie");
-    fetch(staticFile(fileName))
-      .then((res: Response) => {
-        if (!res.ok) throw new Error("No students.json");
-        return res.json() as Promise<LottieAnimationData>;
-      })
-      .then((data: LottieAnimationData) => {
-        setLottieData(data);
-        continueRender(handle);
-      })
-      .catch(() => {
-        // Fallback anggun ke komponen audience teranimasi
-        continueRender(handle);
-      });
-  }, []);
-
-  // Animasi nafas & pergerakan murid yang duduk
-  const studentBreathe = Math.sin((frame / fps) * Math.PI * 1.8) * 2;
-  const writingMotion = Math.sin((frame / fps) * Math.PI * 4) * 1.5;
-
-  // Kamera bergerak maju perlahan ke arah papan tulis depan
-  const cameraZoom = interpolate(frame, [0, 150], [1.0, 1.08], {
+  // Kamera bergerak maju perlahan ke arah papan tulis depan (cinematic dolly-in)
+  const cameraZoom = interpolate(frame, [0, Math.max(1, totalDuration - 20)], [1.0, 1.08], {
+    extrapolateRight: "clamp",
+  });
+  const cameraY = interpolate(frame, [0, Math.max(1, totalDuration - 20)], [0, -18], {
     extrapolateRight: "clamp",
   });
 
+  // Fade in halus saat transisi dari gedung sekolah & fade out sebelum perkenalan pemateri
+  const audienceOpacity = interpolate(
+    frame,
+    [0, 20, Math.max(21, totalDuration - 20), totalDuration],
+    [0, 1, 1, 0],
+    { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+  );
+
   return (
-    <div className="relative w-full h-full overflow-hidden select-none bg-[#5b7d5f]">
-      {/* ── 1. Dinding Depan Kelas & Papan Tulis di Kejauhan ── */}
-      <div 
-        className="absolute inset-0 flex flex-col justify-between will-change-transform"
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        width: 1920,
+        height: 1080,
+        overflow: "hidden",
+        userSelect: "none",
+        backgroundColor: "#4d6d51",
+        fontFamily: "Inter, system-ui, sans-serif",
+        opacity: audienceOpacity,
+      }}
+    >
+      {/* ── KONTAINER ZOOM KAMERA CINEMATIC DOLLY ── */}
+      <div
         style={{
-          transform: `scale(${cameraZoom})`,
-          transformOrigin: "50% 40%",
+          position: "absolute",
+          inset: 0,
+          transform: `scale(${cameraZoom}) translateY(${cameraY}px)`,
+          transformOrigin: "50% 35%",
+          willChange: "transform",
         }}
       >
-        {/* Dinding Atas Hijau Sage */}
-        <div className="w-full h-[65%] bg-gradient-to-b from-[#4d6d51] via-[#5b7d5f] to-[#557559] relative flex items-center justify-center">
-          {/* Papan Tulis Hijau Tua di Dinding Depan */}
-          <div className="w-[880px] h-[360px] bg-[#133526] border-8 border-[#5c371d] rounded-2xl shadow-2xl flex flex-col items-center justify-center p-6 relative">
-            <span className="text-yellow-300 font-mono font-bold text-sm tracking-widest uppercase bg-emerald-950/80 px-4 py-1 rounded-full border border-emerald-500">
-              Pertemuan Matematika Kalkulus
-            </span>
-            <h2 className="text-5xl font-black text-white font-mono mt-3 tracking-wider">
-              BAB: PERTIDAKSAMAAN
-            </h2>
-            <p className="text-emerald-200 font-sans text-lg mt-2">
-              Linear • Rasional • Irasional • Nilai Mutlak
-            </p>
-
-            {/* Tulisan Kapur Halus di Papan */}
-            <div className="absolute bottom-4 left-6 text-xs text-white/40 font-mono">
-              ax + b &lt; c &nbsp;&nbsp;|&nbsp;&nbsp; P(x)/Q(x) &le; 0
-            </div>
-            <div className="absolute bottom-4 right-6 text-xs text-white/40 font-mono">
-              &radic;f(x) &lt; g(x) &nbsp;&nbsp;|&nbsp;&nbsp; |x| &le; a
-            </div>
-          </div>
-
-          {/* Jam Dinding di Kiri Depan */}
-          <div className="absolute top-8 left-16 w-16 h-16 rounded-full bg-white border-4 border-[#784928] shadow-md flex items-center justify-center">
-            <div className="w-1 h-5 bg-black origin-bottom rounded-full" />
-            <div className="w-0.5 h-6 bg-red-600 origin-bottom rounded-full" />
-          </div>
-
-          {/* Jendela Kiri dengan Sinar Matahari Masuk */}
-          <div className="absolute top-6 left-0 w-28 h-72 bg-gradient-to-br from-[#e0f2fe] to-[#fef08a] border-r-8 border-y-8 border-[#cad8c5] opacity-80" />
-          {/* Sinar Menyinari Lantai */}
-          <div 
-            className="absolute top-10 left-28 w-[500px] h-full pointer-events-none opacity-25 mix-blend-screen"
+        {/* =========================================================
+            1. DINDING DEPAN KELAS (WALL: y: 0 s/d y: 510)
+        ========================================================= */}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: 510,
+            background: "linear-gradient(180deg, #446147 0%, #537557 50%, #5d8161 100%)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Lis Kayu Langit-langit Atas & Lampu Panel */}
+          <div
             style={{
-              background: "linear-gradient(135deg, rgba(254, 240, 138, 0.5) 0%, transparent 70%)",
-              transform: "skewX(-30deg)",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 28,
+              backgroundColor: "#d5c7a3",
+              borderBottom: "4px solid #8c6239",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-around",
+              padding: "0 80px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+              zIndex: 5,
+            }}
+          >
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                style={{
+                  width: 240,
+                  height: 10,
+                  backgroundColor: "#fef9c3",
+                  border: "1px solid #78716c",
+                  borderRadius: 2,
+                  boxShadow: "0 0 10px rgba(254,249,195,0.75)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Jendela Kiri dengan Efek Kaca & Sinar Matahari */}
+          <div
+            style={{
+              position: "absolute",
+              top: 40,
+              left: 0,
+              width: 140,
+              height: 380,
+              background: "linear-gradient(135deg, #e0f2fe 0%, #fef08a 100%)",
+              borderRight: "8px solid #c4d4c0",
+              borderTop: "8px solid #c4d4c0",
+              borderBottom: "8px solid #c4d4c0",
+              opacity: 0.9,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-around",
+              padding: "8px 0",
+            }}
+          >
+            <div style={{ width: "100%", height: 4, backgroundColor: "#c4d4c0" }} />
+            <div style={{ width: "100%", height: 4, backgroundColor: "#c4d4c0" }} />
+          </div>
+
+          {/* Sorot Sinar Matahari Menembus Masuk ke Ruang Kelas */}
+          <div
+            style={{
+              position: "absolute",
+              top: 40,
+              left: 140,
+              width: 750,
+              height: 600,
+              pointerEvents: "none",
+              opacity: 0.22,
+              background: "linear-gradient(130deg, rgba(254, 240, 138, 0.6) 0%, transparent 65%)",
+              transform: "skewX(-32deg)",
+            }}
+          />
+
+          {/* Jam Dinding di Kiri Atas */}
+          <div
+            style={{
+              position: "absolute",
+              top: 45,
+              left: 180,
+              width: 64,
+              height: 64,
+              borderRadius: "50%",
+              backgroundColor: "#ffffff",
+              border: "4px solid #6d411e",
+              boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div style={{ width: 2.5, height: 20, backgroundColor: "#0f172a", transformOrigin: "bottom center", borderRadius: 2 }} />
+            <div style={{ width: 1.5, height: 24, backgroundColor: "#dc2626", transformOrigin: "bottom center", borderRadius: 2 }} />
+            <div style={{ width: 6, height: 6, borderRadius: "50%", backgroundColor: "#dc2626", position: "absolute" }} />
+          </div>
+
+          {/* ── PAPAN TULIS UTAMA KELAS (DI TENGAH ATAS, BERSIH & TIDAK TERTUTUP APAPUN) ── */}
+          <div
+            style={{
+              position: "absolute",
+              top: 48,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 1040,
+              height: 380,
+              backgroundColor: "#133526",
+              border: "12px solid #6d411e",
+              borderRadius: 18,
+              boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              padding: "20px 28px",
+              boxSizing: "border-box",
+            }}
+          >
+            {/* Tekstur Kapur Halus */}
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                pointerEvents: "none",
+                opacity: 0.1,
+                backgroundImage:
+                  "radial-gradient(circle at 30% 35%, rgba(255,255,255,0.4), transparent 50%), radial-gradient(circle at 70% 65%, rgba(255,255,255,0.3), transparent 50%)",
+              }}
+            />
+
+            {/* Header Papan Tulis */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1.5px solid rgba(167, 243, 208, 0.3)", paddingBottom: 8 }}>
+              <span
+                style={{
+                  color: "#fde047",
+                  fontFamily: "monospace",
+                  fontWeight: 900,
+                  fontSize: 13,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  backgroundColor: "rgba(2, 44, 34, 0.85)",
+                  padding: "4px 14px",
+                  borderRadius: 999,
+                  border: "1px solid rgba(52, 211, 153, 0.5)",
+                }}
+              >
+                Pertemuan Matematika Kalkulus
+              </span>
+              <span style={{ color: "#a7f3d0", fontFamily: "monospace", fontSize: 13, fontWeight: "bold" }}>
+                Target Durasi 60 Menit
+              </span>
+            </div>
+
+            {/* Judul Besar Tengah Papan Tulis */}
+            <div style={{ textAlign: "center", margin: "10px 0" }}>
+              <h2
+                style={{
+                  fontSize: 48,
+                  fontWeight: 900,
+                  color: "#ffffff",
+                  fontFamily: "monospace",
+                  letterSpacing: "0.08em",
+                  margin: 0,
+                  textShadow: "0 2px 8px rgba(0,0,0,0.4)",
+                }}
+              >
+                BAB: PERTIDAKSAMAAN
+              </h2>
+              <p
+                style={{
+                  color: "#6ee7b7",
+                  fontSize: 19,
+                  fontWeight: 700,
+                  letterSpacing: "0.04em",
+                  margin: "8px 0 0 0",
+                }}
+              >
+                Linear • Rasional • Irasional • Nilai Mutlak
+              </p>
+            </div>
+
+            {/* Catatan Kapur di Sisi Bawah Papan */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid rgba(167, 243, 208, 0.2)", paddingTop: 8 }}>
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontFamily: "monospace" }}>
+                ax + b &lt; c &nbsp;&nbsp;|&nbsp;&nbsp; f(x)/g(x) &le; 0
+              </span>
+              <span style={{ fontSize: 12, color: "#fde047", fontFamily: "monospace", fontWeight: "bold" }}>
+                Universitas Nusa Mandiri
+              </span>
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", fontFamily: "monospace" }}>
+                &radic;f(x) &lt; g(x) &nbsp;&nbsp;|&nbsp;&nbsp; |x| &le; a
+              </span>
+            </div>
+
+            {/* Tatakan Kapur & Penghapus di Bawah Frame Papan Tulis */}
+            <div
+              style={{
+                position: "absolute",
+                bottom: -11,
+                left: "25%",
+                right: "25%",
+                height: 8,
+                backgroundColor: "#522e13",
+                borderTop: "1px solid #8b572a",
+                borderRadius: "0 0 4px 4px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 16,
+              }}
+            >
+              <div style={{ width: 28, height: 4, backgroundColor: "#ffffff", borderRadius: 999 }} />
+              <div style={{ width: 22, height: 4.5, backgroundColor: "#fef08a", borderRadius: 2 }} />
+              <div style={{ width: 34, height: 5, backgroundColor: "#1e293b", borderRadius: 2 }} />
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================
+            2. LANTAI KELAS DENGAN PERSPEKTIF UBIN (y: 500 s/d 1080)
+        ========================================================= */}
+        <div
+          style={{
+            position: "absolute",
+            top: 500,
+            left: 0,
+            width: "100%",
+            height: 580,
+            backgroundColor: "#728c75",
+            borderTop: "10px solid #5c371d",
+            overflow: "hidden",
+          }}
+        >
+          {/* Garis-Garis Ubin Perspektif Mengarah ke Titik Hilang */}
+          <svg
+            viewBox="0 0 1920 580"
+            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", pointerEvents: "none", opacity: 0.28 }}
+          >
+            {/* Garis lantai horizontal bertingkat */}
+            <line x1="0" y1="90" x2="1920" y2="90" stroke="#1e4631" strokeWidth="1.5" />
+            <line x1="0" y1="200" x2="1920" y2="200" stroke="#1e4631" strokeWidth="2" />
+            <line x1="0" y1="340" x2="1920" y2="340" stroke="#1e4631" strokeWidth="2.5" />
+            <line x1="0" y1="490" x2="1920" y2="490" stroke="#1e4631" strokeWidth="3" />
+
+            {/* Garis lantai perspektif diagonal memancar dari titik tengah dinding */}
+            <line x1="960" y1="0" x2="100" y2="580" stroke="#1e4631" strokeWidth="2" />
+            <line x1="960" y1="0" x2="380" y2="580" stroke="#1e4631" strokeWidth="2" />
+            <line x1="960" y1="0" x2="680" y2="580" stroke="#1e4631" strokeWidth="1.5" />
+            <line x1="960" y1="0" x2="1240" y2="580" stroke="#1e4631" strokeWidth="1.5" />
+            <line x1="960" y1="0" x2="1540" y2="580" stroke="#1e4631" strokeWidth="2" />
+            <line x1="960" y1="0" x2="1820" y2="580" stroke="#1e4631" strokeWidth="2" />
+          </svg>
+
+          {/* Pantulan Sinar Matahari di Lantai */}
+          <div
+            style={{
+              position: "absolute",
+              left: 180,
+              top: 10,
+              width: 380,
+              height: 220,
+              backgroundColor: "rgba(254, 240, 138, 0.2)",
+              transform: "skewX(-36deg)",
+              borderRadius: 6,
+              filter: "blur(4px)",
+              pointerEvents: "none",
             }}
           />
         </div>
 
-        {/* Lantai Ruang Kelas */}
-        <div className="w-full h-[35%] bg-[#7e9982] border-t-8 border-[#7a4927] relative" />
+        {/* =========================================================
+            3. BARIS BELAKANG (MIDGROUND ROW: y: 490 s/d 730)
+            4 Siswa duduk di meja kayu dengan kaki meja menapak di lantai.
+            Kepala berada di y ~ 490-520, TIDAK MENUTUPI PAPAN TULIS!
+        ========================================================= */}
+        <div
+          style={{
+            position: "absolute",
+            top: 490,
+            left: 0,
+            width: "100%",
+            height: 250,
+            display: "flex",
+            justifyContent: "space-around",
+            padding: "0 100px",
+            boxSizing: "border-box",
+            zIndex: 20,
+          }}
+        >
+          {/* Siswa 1 (Kiri Luar) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 240 }}>
+            {/* Sosok Siswa */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe1}px)`,
+                willChange: "transform",
+                marginBottom: -12,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 50, height: 50, borderRadius: "50%", backgroundColor: "#0f172a", boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }} />
+              <div style={{ width: 88, height: 58, backgroundColor: "#f8fafc", border: "2px solid #cbd5e1", borderRadius: "14px 14px 0 0", boxShadow: "0 4px 6px rgba(0,0,0,0.15)" }} />
+            </div>
+            {/* Meja Belajar Kayu dengan Kaki Meja Menapak */}
+            <div
+              style={{
+                width: 220,
+                height: 48,
+                backgroundColor: "#a16207",
+                border: "3px solid #78350f",
+                borderRadius: "6px 6px 0 0",
+                boxShadow: "0 8px 18px rgba(0,0,0,0.3)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: "0 16px",
+                zIndex: 3,
+              }}
+            >
+              <div style={{ width: 44, height: 28, backgroundColor: "#dbeafe", border: "1px solid #93c5fd", borderRadius: 3, marginTop: -10 }} />
+              <div style={{ width: 28, height: 8, backgroundColor: "#f87171", borderRadius: 999, marginTop: -6 }} />
+              {/* 2 Kaki Meja Menapak ke Lantai */}
+              <div style={{ position: "absolute", bottom: -65, left: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+              <div style={{ position: "absolute", bottom: -65, right: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+            </div>
+          </div>
+
+          {/* Siswa 2 (Kiri Tengah - Rambut Ponytail Cokelat) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 240 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe2}px)`,
+                willChange: "transform",
+                marginBottom: -12,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 50, height: 50, borderRadius: "50%", backgroundColor: "#451a03", boxShadow: "0 4px 8px rgba(0,0,0,0.3)", position: "relative" }}>
+                <div style={{ position: "absolute", bottom: -12, left: "50%", transform: "translateX(-50%)", width: 16, height: 28, backgroundColor: "#451a03", borderRadius: 999 }} />
+              </div>
+              <div style={{ width: 88, height: 58, backgroundColor: "#f8fafc", border: "2px solid #cbd5e1", borderRadius: "14px 14px 0 0", boxShadow: "0 4px 6px rgba(0,0,0,0.15)" }} />
+            </div>
+            <div
+              style={{
+                width: 220,
+                height: 48,
+                backgroundColor: "#a16207",
+                border: "3px solid #78350f",
+                borderRadius: "6px 6px 0 0",
+                boxShadow: "0 8px 18px rgba(0,0,0,0.3)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: "0 16px",
+                zIndex: 3,
+              }}
+            >
+              <div style={{ width: 50, height: 28, backgroundColor: "#fef08a", border: "1px solid #fde047", borderRadius: 3, marginTop: -10 }} />
+              <div style={{ width: 36, height: 10, backgroundColor: "#059669", borderRadius: 3, marginTop: -6 }} />
+              <div style={{ position: "absolute", bottom: -65, left: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+              <div style={{ position: "absolute", bottom: -65, right: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+            </div>
+          </div>
+
+          {/* Siswa 3 (Kanan Tengah - Seragam Almet Biru Muda) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 240 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe3}px)`,
+                willChange: "transform",
+                marginBottom: -12,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 50, height: 50, borderRadius: "50%", backgroundColor: "#1e293b", boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }} />
+              <div style={{ width: 88, height: 58, backgroundColor: "#7ec8f8", border: "2px solid #38bdf8", borderRadius: "14px 14px 0 0", boxShadow: "0 4px 6px rgba(0,0,0,0.15)" }} />
+            </div>
+            <div
+              style={{
+                width: 220,
+                height: 48,
+                backgroundColor: "#a16207",
+                border: "3px solid #78350f",
+                borderRadius: "6px 6px 0 0",
+                boxShadow: "0 8px 18px rgba(0,0,0,0.3)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: "0 16px",
+                zIndex: 3,
+              }}
+            >
+              <div style={{ width: 44, height: 28, backgroundColor: "#d1fae5", border: "1px solid #a7f3d0", borderRadius: 3, marginTop: -10 }} />
+              <div style={{ position: "absolute", bottom: -65, left: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+              <div style={{ position: "absolute", bottom: -65, right: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+            </div>
+          </div>
+
+          {/* Siswa 4 (Kanan Luar) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 240 }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe1}px)`,
+                willChange: "transform",
+                marginBottom: -12,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 50, height: 50, borderRadius: "50%", backgroundColor: "#18181b", boxShadow: "0 4px 8px rgba(0,0,0,0.3)" }} />
+              <div style={{ width: 88, height: 58, backgroundColor: "#f8fafc", border: "2px solid #cbd5e1", borderRadius: "14px 14px 0 0", boxShadow: "0 4px 6px rgba(0,0,0,0.15)" }} />
+            </div>
+            <div
+              style={{
+                width: 220,
+                height: 48,
+                backgroundColor: "#a16207",
+                border: "3px solid #78350f",
+                borderRadius: "6px 6px 0 0",
+                boxShadow: "0 8px 18px rgba(0,0,0,0.3)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: "0 16px",
+                zIndex: 3,
+              }}
+            >
+              <div style={{ width: 44, height: 28, backgroundColor: "#e2e8f0", border: "1px solid #cbd5e1", borderRadius: 3, marginTop: -10 }} />
+              <div style={{ position: "absolute", bottom: -65, left: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+              <div style={{ position: "absolute", bottom: -65, right: 18, width: 7, height: 65, backgroundColor: "#334155", borderRadius: 2 }} />
+            </div>
+          </div>
+        </div>
+
+        {/* =========================================================
+            4. BARIS DEPAN (FOREGROUND ROW: y: 720 s/d 1080)
+            Ukuran lebih besar (Depth-of-field), lorong tengah kelas terbuka.
+        ========================================================= */}
+        <div
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: "100%",
+            height: 360,
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "0 120px",
+            boxSizing: "border-box",
+            zIndex: 30,
+            pointerEvents: "none",
+          }}
+        >
+          {/* Siswa Kiri Depan (Menulis Catatan Rumus) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 500, justifyContent: "flex-end" }}>
+            {/* Kepala & Punggung Siswa Lebih Detail */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe1 * 1.2}px)`,
+                willChange: "transform",
+                marginBottom: -32,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 96, height: 96, borderRadius: "50%", backgroundColor: "#09090b", boxShadow: "0 6px 14px rgba(0,0,0,0.4)" }} />
+              <div
+                style={{
+                  width: 180,
+                  height: 120,
+                  backgroundColor: "#f8fafc",
+                  border: "3px solid #cbd5e1",
+                  borderRadius: "26px 26px 0 0",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+                  display: "flex",
+                  justifyContent: "center",
+                  paddingTop: 8,
+                }}
+              >
+                <div style={{ width: 44, height: 26, borderBottom: "3px solid #94a3b8" }} />
+              </div>
+            </div>
+
+            {/* Meja Besar Depan Kiri */}
+            <div
+              style={{
+                width: 480,
+                height: 100,
+                backgroundColor: "#854d0e",
+                border: "5px solid #713f12",
+                borderRadius: "12px 12px 0 0",
+                boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "0 40px",
+                zIndex: 3,
+              }}
+            >
+              {/* Buku Catatan Terbuka dengan Animasi Menulis */}
+              <div
+                style={{
+                  width: 140,
+                  height: 80,
+                  backgroundColor: "#ffffff",
+                  border: "2px solid #cbd5e1",
+                  borderRadius: 6,
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
+                  marginTop: -38,
+                  display: "flex",
+                  padding: 10,
+                  gap: 6,
+                  transform: `rotate(-2deg) translateY(${writingMotion}px)`,
+                  willChange: "transform",
+                }}
+              >
+                <div style={{ width: "50%", height: "100%", borderRight: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: 5 }}>
+                  <div style={{ width: "100%", height: 5, backgroundColor: "#93c5fd", borderRadius: 2 }} />
+                  <div style={{ width: "80%", height: 5, backgroundColor: "#cbd5e1", borderRadius: 2 }} />
+                  <div style={{ width: "100%", height: 5, backgroundColor: "#cbd5e1", borderRadius: 2 }} />
+                  <div style={{ width: "60%", height: 5, backgroundColor: "#cbd5e1", borderRadius: 2 }} />
+                </div>
+                <div style={{ width: "50%", height: "100%", paddingLeft: 6, display: "flex", flexDirection: "column", gap: 5 }}>
+                  <div style={{ width: "100%", height: 5, backgroundColor: "#cbd5e1", borderRadius: 2 }} />
+                  <div style={{ width: "70%", height: 5, backgroundColor: "#fca5a5", borderRadius: 2 }} />
+                  <div style={{ width: "90%", height: 5, backgroundColor: "#cbd5e1", borderRadius: 2 }} />
+                </div>
+              </div>
+
+              {/* Kotak Pensil & Penggaris Kuning */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: -24 }}>
+                <div style={{ width: 80, height: 24, backgroundColor: "#0284c7", borderRadius: 999, border: "1.5px solid #0369a1", boxShadow: "0 2px 6px rgba(0,0,0,0.25)" }} />
+                <div style={{ width: 60, height: 10, backgroundColor: "#facc15", borderRadius: 2, boxShadow: "0 2px 4px rgba(0,0,0,0.2)" }} />
+              </div>
+
+              {/* 2 Kaki Meja Baja Kokoh Menapak ke Dasar Lantai */}
+              <div style={{ position: "absolute", bottom: -110, left: 32, width: 12, height: 110, backgroundColor: "#1e293b", borderRadius: 3 }} />
+              <div style={{ position: "absolute", bottom: -110, right: 32, width: 12, height: 110, backgroundColor: "#1e293b", borderRadius: 3 }} />
+            </div>
+          </div>
+
+          {/* Siswa Kanan Depan (Menyimak Paparan Materi) */}
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: 500, justifyContent: "flex-end" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                transform: `translateY(${breathe2 * 1.2}px)`,
+                willChange: "transform",
+                marginBottom: -32,
+                zIndex: 2,
+              }}
+            >
+              <div style={{ width: 96, height: 96, borderRadius: "50%", backgroundColor: "#1f2937", boxShadow: "0 6px 14px rgba(0,0,0,0.4)" }} />
+              <div
+                style={{
+                  width: 180,
+                  height: 120,
+                  backgroundColor: "#f8fafc",
+                  border: "3px solid #cbd5e1",
+                  borderRadius: "26px 26px 0 0",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.25)",
+                }}
+              />
+            </div>
+
+            {/* Meja Besar Depan Kanan */}
+            <div
+              style={{
+                width: 480,
+                height: 100,
+                backgroundColor: "#854d0e",
+                border: "5px solid #713f12",
+                borderRadius: "12px 12px 0 0",
+                boxShadow: "0 15px 35px rgba(0,0,0,0.45)",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-around",
+                padding: "0 40px",
+                zIndex: 3,
+              }}
+            >
+              {/* Buku Teks Kalkulus Hijau & Smartphone/Notepad */}
+              <div style={{ width: 110, height: 70, backgroundColor: "#065f46", border: "2px solid #10b981", borderRadius: 5, marginTop: -30, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 4px 6px rgba(0,0,0,0.2)" }}>
+                <span style={{ color: "#a7f3d0", fontFamily: "monospace", fontSize: 11, fontWeight: "bold" }}>KALKULUS</span>
+              </div>
+              <div style={{ width: 54, height: 32, backgroundColor: "#334155", borderRadius: 4, marginTop: -20, border: "1px solid #64748b" }} />
+
+              {/* 2 Kaki Meja Baja Kokoh */}
+              <div style={{ position: "absolute", bottom: -110, left: 32, width: 12, height: 110, backgroundColor: "#1e293b", borderRadius: 3 }} />
+              <div style={{ position: "absolute", bottom: -110, right: 32, width: 12, height: 110, backgroundColor: "#1e293b", borderRadius: 3 }} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* ── 2. Render Murid-Murid Duduk Menghadap Depan ── */}
-      {lottieData ? (
-        <div className="absolute inset-0 z-20 flex items-end justify-center pointer-events-none">
-          <Lottie animationData={lottieData} loop style={{ width: "100%", height: "85%" }} />
-        </div>
-      ) : (
-        /* Vektor Penonton / Murid-Murid Duduk di Bangku (Sudut Pandang Belakang) */
-        <div className="absolute inset-x-0 bottom-0 z-20 h-[520px] pointer-events-none flex flex-col justify-end">
-          
-          {/* Deretan Meja & Murid Baris Depan (Agak Kecil di Tengah) */}
-          <div className="w-full flex justify-around px-24 -mb-16 opacity-90 scale-90">
-            {/* Meja Murid 1 */}
-            <div className="flex flex-col items-center">
-              {/* Kepala & Punggung Murid */}
-              <div 
-                className="w-24 h-32 flex flex-col items-center will-change-transform"
-                style={{ transform: `translateY(${studentBreathe}px)` }}
-              >
-                {/* Rambut Belakang */}
-                <div className="w-16 h-16 rounded-full bg-[#1e293b] shadow-md -mb-2" />
-                {/* Punggung Baju Putih Seragam */}
-                <div className="w-28 h-20 bg-white border-2 border-gray-300 rounded-t-2xl shadow" />
-              </div>
-              {/* Meja Kayu Murid */}
-              <div className="w-64 h-16 bg-[#a16207] border-4 border-[#78350f] rounded-t-lg shadow-2xl relative flex items-center justify-around px-6">
-                <div className="w-14 h-10 bg-blue-100 border border-blue-300 rounded shadow-sm -mt-4" />
-                <div className="w-8 h-3 bg-red-400 rounded-full -mt-2" />
-              </div>
-            </div>
-
-            {/* Meja Murid 2 (Kuncir Kuda / Rambut Panjang) */}
-            <div className="flex flex-col items-center">
-              <div 
-                className="w-24 h-32 flex flex-col items-center will-change-transform"
-                style={{ transform: `translateY(${-studentBreathe}px)` }}
-              >
-                <div className="w-16 h-16 rounded-full bg-[#451a03] shadow-md -mb-2 relative">
-                  <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-6 h-10 bg-[#451a03] rounded-full" />
-                </div>
-                <div className="w-28 h-20 bg-white border-2 border-gray-300 rounded-t-2xl shadow" />
-              </div>
-              <div className="w-64 h-16 bg-[#a16207] border-4 border-[#78350f] rounded-t-lg shadow-2xl relative flex items-center justify-around px-6">
-                <div className="w-16 h-10 bg-yellow-100 border border-yellow-300 rounded shadow-sm -mt-4" />
-                <div className="w-12 h-4 bg-emerald-600 rounded -mt-2" />
-              </div>
-            </div>
-
-            {/* Meja Murid 3 */}
-            <div className="flex flex-col items-center">
-              <div 
-                className="w-24 h-32 flex flex-col items-center will-change-transform"
-                style={{ transform: `translateY(${studentBreathe * 0.8}px)` }}
-              >
-                <div className="w-16 h-16 rounded-full bg-[#18181b] shadow-md -mb-2" />
-                <div className="w-28 h-20 bg-white border-2 border-gray-300 rounded-t-2xl shadow" />
-              </div>
-              <div className="w-64 h-16 bg-[#a16207] border-4 border-[#78350f] rounded-t-lg shadow-2xl relative flex items-center justify-around px-6">
-                <div className="w-14 h-10 bg-emerald-100 border border-emerald-300 rounded shadow-sm -mt-4" />
-              </div>
-            </div>
-          </div>
-
-          {/* Deretan Meja & Murid Baris Belakang (Lebih Besar di Foreground) */}
-          <div className="w-full flex justify-between px-12 -mb-4">
-            
-            {/* Murid Kiri Bawah (Menulis Catatan) */}
-            <div className="flex flex-col items-center">
-              <div 
-                className="w-36 h-44 flex flex-col items-center will-change-transform"
-                style={{ transform: `translateY(${studentBreathe}px)` }}
-              >
-                <div className="w-22 h-22 rounded-full bg-[#09090b] shadow-xl -mb-4" />
-                <div className="w-40 h-28 bg-[#f8fafc] border-2 border-gray-300 rounded-t-3xl shadow-xl flex justify-center pt-2">
-                  {/* Kerah Baju */}
-                  <div className="w-10 h-6 border-b-2 border-gray-400" />
-                </div>
-              </div>
-              {/* Meja Belakang Kiri */}
-              <div className="w-96 h-24 bg-[#854d0e] border-4 border-[#713f12] rounded-t-xl shadow-2xl relative flex items-center justify-between px-10">
-                {/* Buku Catatan Terbuka */}
-                <div 
-                  className="w-28 h-16 bg-white border-2 border-gray-300 rounded shadow-md -mt-8 flex p-2 gap-1 will-change-transform"
-                  style={{ transform: `rotate(-3deg) translateY(${writingMotion}px)` }}
-                >
-                  <div className="w-1/2 h-full border-r border-gray-200 space-y-1">
-                    <div className="w-full h-1 bg-blue-300 rounded" />
-                    <div className="w-3/4 h-1 bg-gray-300 rounded" />
-                    <div className="w-full h-1 bg-gray-300 rounded" />
-                  </div>
-                  <div className="w-1/2 h-full space-y-1 pl-1">
-                    <div className="w-full h-1 bg-gray-300 rounded" />
-                    <div className="w-2/3 h-1 bg-red-300 rounded" />
-                  </div>
-                </div>
-
-                {/* Kotak Pensil & Penggaris */}
-                <div className="flex items-center gap-2 -mt-4">
-                  <div className="w-16 h-5 bg-sky-500 rounded-full shadow border border-sky-600" />
-                  <div className="w-12 h-2 bg-yellow-400 rounded shadow" />
-                </div>
-              </div>
-            </div>
-
-            {/* Murid Kanan Bawah (Menyimak Khidmat) */}
-            <div className="flex flex-col items-center">
-              <div 
-                className="w-36 h-44 flex flex-col items-center will-change-transform"
-                style={{ transform: `translateY(${-studentBreathe * 1.1}px)` }}
-              >
-                {/* Rambut Bergelombang / Cokelat Tua */}
-                <div className="w-24 h-24 rounded-full bg-[#3f200c] shadow-xl -mb-4 relative">
-                  <div className="absolute -bottom-2 right-0 w-8 h-12 bg-[#3f200c] rounded-full" />
-                </div>
-                <div className="w-40 h-28 bg-[#f8fafc] border-2 border-gray-300 rounded-t-3xl shadow-xl flex justify-center pt-2">
-                  <div className="w-10 h-6 border-b-2 border-gray-400" />
-                </div>
-              </div>
-              {/* Meja Belakang Kanan */}
-              <div className="w-96 h-24 bg-[#854d0e] border-4 border-[#713f12] rounded-t-xl shadow-2xl relative flex items-center justify-between px-10">
-                {/* Buku Pelajaran Matematika Tebal */}
-                <div className="w-28 h-16 bg-[#15803d] border-2 border-[#166534] rounded shadow-md -mt-8 p-2 flex flex-col justify-between">
-                  <span className="text-[9px] text-yellow-300 font-bold font-mono">KALKULUS 1</span>
-                  <div className="w-full h-1 bg-white/60" />
-                  <span className="text-[8px] text-white font-mono">Edisi Siswa</span>
-                </div>
-
-                {/* Pulpen dan Pensil */}
-                <div className="w-14 h-2 bg-black rounded-full -mt-4 shadow" />
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ── 3. Overlay Informasi Suasana Kelas ── */}
-      <div className="absolute top-8 left-10 z-30 flex items-center gap-3 bg-[#064e3b]/95 border border-emerald-400 px-6 py-2.5 rounded-full shadow-2xl">
-        <span className="text-xl">🎒</span>
+      {/* ── 5. OVERLAY BADGE INFORMASI SUASANA KELAS ── */}
+      <div
+        style={{
+          position: "absolute",
+          top: 40,
+          left: 48,
+          zIndex: 40,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          backgroundColor: "rgba(6, 78, 59, 0.95)",
+          border: "1.5px solid #34d399",
+          padding: "8px 22px",
+          borderRadius: 999,
+          boxShadow: "0 10px 25px rgba(0,0,0,0.35)",
+        }}
+      >
+        <span style={{ fontSize: 22 }}>🎒</span>
         <div>
-          <p className="text-yellow-300 font-mono font-bold text-xs uppercase tracking-wide">
-            Suasana Kelas Pagi Hari • 30 Siswa Siap Belajar
+          <p style={{ color: "#fde047", fontFamily: "monospace", fontWeight: "bold", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>
+            Suasana Kelas Pagi Hari • 30 Mahasiswa Siap Belajar
           </p>
-          <p className="text-emerald-100 font-sans text-xs">
-            Murid-murid duduk tertib memperhatikan presentasi di papan tulis
+          <p style={{ color: "#ecfdf5", fontSize: 11.5, margin: "2px 0 0 0" }}>
+            Fokus menyimak pembahasan 4 cabang utama pertidaksamaan
           </p>
         </div>
       </div>
