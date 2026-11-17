@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
- * MCP SERVER & 1:1 EXACT VISUAL REBUILDER — VIDEO PERTIDAKSAMAAN 60 MENIT
- * Bisa dijalankan langsung via: node mcp-pertidaksamaan-server.mjs --apply
- * Atau didaftarkan sebagai MCP Server di AI Antigravity (stdio protocol).
+ * MCP SERVER & 1:1 EXACT VISUAL REBUILDER V3.0 — VIDEO PERTIDAKSAMAAN 60 MENIT
+ * Fitur Baru V3.0:
+ * - 4 Scene Intro Khusus Pemateri (Scene02A-IntroRafie, Scene06A-IntroIkhsan, Scene08A-IntroPras, Scene10A-IntroDimas)
+ * - Di Scene Intro Pemateri: TANPA PAPAN TULIS, pemateri berdiri di TENGAH, dan kamera ZOOM-IN ke arah pemateri.
+ *
+ * Cara jalankan langsung: node mcp-pertidaksamaan-server.mjs --apply
  */
 import fs from 'fs';
 import path from 'path';
@@ -12,7 +15,7 @@ const ROOT_DIR = process.cwd();
 
 const FILES_TO_WRITE = {
   // ==========================================================================
-  // 1. MASTER DATA 16 SCENE (60 MENIT = 108.000 FRAMES) & 4 KARAKTER
+  // 1. MASTER DATA 20 SCENE (TERMASUK 4 SCENE INTRO ZOOM PEMATERI)
   // ==========================================================================
   'src/data/scenesData.ts': `export const FPS = 30;
 export const TOTAL_MINUTES = 60;
@@ -23,6 +26,7 @@ export interface CharacterProfile {
   name: string;
   fullName: string;
   role: string;
+  topicBadge: string;
   desc: string;
 }
 
@@ -32,13 +36,15 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'IKHSAN',
     fullName: 'Ikhsan',
     role: 'Pemateri 2 • Pertidaksamaan Rasional (Pecahan)',
+    topicBadge: 'CABANG 2: PERTIDAKSAMAAN RASIONAL (PECAHAN ALJABAR)',
     desc: 'Rambut messy bowl cut berponi, kacamata bulat, kemeja batik di balik jas biru muda polos, memegang pointer.'
   },
   rafie: {
     id: 'rafie',
     name: 'RAFIE',
     fullName: 'Rafie Armansyah',
-    role: 'Moderator & Pemateri 1 • Opening, PLSV, PLDV & Closing',
+    role: 'Moderator & Pemateri 1 • Pertidaksamaan Linear (PLSV & PLDV)',
+    topicBadge: 'CABANG 1: PERTIDAKSAMAAN LINEAR (1 & 2 VARIABEL)',
     desc: 'Rambut hitam rapi belah tengah, berkacamata frame tipis, kemeja putih di balik jas biru muda polos, memegang tablet.'
   },
   pras: {
@@ -46,6 +52,7 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'PRAS',
     fullName: 'Pras',
     role: 'Pemateri 3 • Pertidaksamaan Irasional (Bentuk Akar)',
+    topicBadge: 'CABANG 3: PERTIDAKSAMAAN IRASIONAL (BENTUK AKAR)',
     desc: 'Rambut sedikit bergelombang tanpa kacamata, kaos polo gelap di balik jas biru muda polos, gestur tangan terbuka.'
   },
   dimas: {
@@ -53,6 +60,7 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'DIMAS',
     fullName: 'Dimas',
     role: 'Pemateri 4 • Pertidaksamaan Nilai Mutlak',
+    topicBadge: 'CABANG 4: PERTIDAKSAMAAN NILAI MUTLAK |f(x)|',
     desc: 'Postur tegap/berisi, rambut sangat pendek (buzz cut), kaos hitam di balik jas biru muda polos.'
   }
 };
@@ -76,7 +84,15 @@ export interface SceneItem {
   title: string;
   boardTitle: string;
   boardSubtitle: string;
-  visualType: 'intro-school' | 'number-line' | 'cartesian-pldv' | 'sign-table' | 'mutlak-table' | 'concept-box' | 'summary-master';
+  visualType:
+    | 'presenter-intro'
+    | 'intro-school'
+    | 'number-line'
+    | 'cartesian-pldv'
+    | 'sign-table'
+    | 'mutlak-table'
+    | 'concept-box'
+    | 'summary-master';
   voScript: string;
   numberLineConfig?: {
     points: { val: number; filled: boolean; label: string }[];
@@ -93,6 +109,7 @@ export interface SceneItem {
 }
 
 export const SCENES_DATA: SceneItem[] = [
+  // 1. SCENE 01: INTRO SEKOLAH & 4 KARAKTER
   {
     id: 'scene-01',
     compId: 'Scene01-Intro',
@@ -128,20 +145,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 2. SCENE 02A: INTRO SOLO RAFIE (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-02a-intro-rafie',
+    compId: 'Scene02A-IntroRafie',
+    code: 'Scene 02A (Intro Rafie)',
+    part: 1,
+    partName: 'Part 1: Intro & Linear',
+    startMin: 2,
+    endMin: 3,
+    presenter: 'rafie',
+    title: 'Scene Intro Pemateri 1: Rafie Armansyah (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 1: RAFIE ARMANSYAH',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Linear Satu & Dua Variabel (PLSV & PLDV)',
+    visualType: 'presenter-intro',
+    voScript: 'Halo semuanya! Selamat datang di video pembelajaran matematika kelompok kami. Kenalkan, gw Rafie Armansyah! Di bagian pertama ini, gw bakal memandu kalian membedah tuntas Pertidaksamaan Linear Satu Variabel dan Dua Variabel beserta 5 contoh soalnya. Yuk langsung kita mulai!',
+    steps: [
+      {
+        label: 'Perkenalan Moderator & Pemateri 1: Rafie Armansyah',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Linear Satu Variabel (PLSV) & Dua Variabel (PLDV)',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Rafie di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Aturan Kali/Bagi Negatif & Uji Titik (0,0)',
+        badge: 'Highlight Topik',
+        eq: 'Hukum Fundamental (<, >, ≤, ≥) • Garis Bilangan 1D • Grafik Kartesius 2D',
+        desc: 'Membahas konsep dasar perbandingan ukuran, isolasi variabel, hingga arsiran Daerah Himpunan Penyelesaian (DHP).'
+      }
+    ]
+  },
+
+  // 3. SCENE 02: HUKUM FUNDAMENTAL (RAFIE + PAPAN TULIS)
   {
     id: 'scene-02',
     compId: 'Scene02-HukumFundamental',
     code: 'Scene 02',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 2,
-    endMin: 5,
+    startMin: 3,
+    endMin: 5.5,
     presenter: 'rafie',
-    title: 'Opening Moderator & Hukum Fundamental Pertidaksamaan',
+    title: 'Hukum Fundamental Pertidaksamaan',
     boardTitle: 'HUKUM FUNDAMENTAL PERTIDAKSAMAAN (<, >, ≤, ≥)',
     boardSubtitle: 'Pemateri: Rafie Armansyah • Aturan Mutlak Penjumlahan vs Perkalian/Pembagian Negatif',
     visualType: 'number-line',
-    voScript: 'Halo semuanya! Selamat datang di video pembelajaran matematika kelompok kami. Kenalkan, gw Rafie Armansyah. Secara sederhana, pertidaksamaan itu adalah kalimat matematika yang nunjukin perbandingan ukuran. Ingat aturan paling kritis: kalau dikali atau dibagi bilangan negatif, tanda wajib berbalik arah!',
+    voScript: 'Secara sederhana, pertidaksamaan itu adalah kalimat matematika yang nunjukin perbandingan ukuran. Ingat aturan paling kritis: kalau dikali atau dibagi bilangan negatif, tanda wajib berbalik arah!',
     numberLineConfig: {
       points: [{ val: -3, filled: false, label: '−3' }],
       shades: [{ from: -3, to: 5.5, label: 'Solusi: x > −3' }],
@@ -172,13 +222,15 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 4. SCENE 03: KONSEP PLSV
   {
     id: 'scene-03',
     compId: 'Scene03-KonsepPLSV',
     code: 'Scene 03',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 5,
+    startMin: 5.5,
     endMin: 8,
     presenter: 'rafie',
     title: 'Konsep Pertidaksamaan Linear Satu Variabel (PLSV)',
@@ -216,6 +268,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 5. SCENE 04: KONSEP PLDV
   {
     id: 'scene-04',
     compId: 'Scene04-KonsepPLDV',
@@ -256,6 +310,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 6. SCENE 05A: SOAL 1 & 2 PLSV
   {
     id: 'scene-05a',
     compId: 'Scene05A-SoalPLSV',
@@ -300,6 +356,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 7. SCENE 05B: SOAL 3, 4 & 5 PLDV
   {
     id: 'scene-05b',
     compId: 'Scene05B-SoalPLDV',
@@ -340,20 +398,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 8. SCENE 06A: INTRO SOLO IKHSAN (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-06a-intro-ikhsan',
+    compId: 'Scene06A-IntroIkhsan',
+    code: 'Scene 06A (Intro Ikhsan)',
+    part: 2,
+    partName: 'Part 2: Rasional (Ikhsan)',
+    startMin: 16,
+    endMin: 17,
+    presenter: 'ikhsan',
+    title: 'Scene Intro Pemateri 2: Ikhsan (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 2: IKHSAN',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Rasional (Bentuk Pecahan Aljabar)',
+    visualType: 'presenter-intro',
+    voScript: 'Siap, thank you, Rafie! Halo teman-teman semuanya, kenalin gw Ikhsan! Di segmen kedua ini, gw bakal ngajak kalian menyelami materi Pertidaksamaan Rasional atau bentuk pecahan aljabar. Ingat satu aturan emasnya: penyebut nggak boleh sama dengan nol! Yuk kita bahas ke papan tulis!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 2: Ikhsan',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Rasional: f(x) / g(x) > 0  dengan  g(x) ≠ 0',
+        desc: 'Kamera melakukan zoom-in ke arah Ikhsan di tengah ruang kelas sebelum menampilkan papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Titik Kritis, Tabel Uji Tanda & 5 Contoh Soal',
+        badge: 'Highlight Topik',
+        eq: 'Pembuat Nol Pembilang vs Penyebut • Larangan Kali Silang • Faktor Tercoret',
+        desc: 'Membedah tuntas cara menentukan tanda interval pada garis bilangan dan menghindari 4 kesalahan fatal.'
+      }
+    ]
+  },
+
+  // 9. SCENE 06: KONSEP RASIONAL (IKHSAN + PAPAN TULIS)
   {
     id: 'scene-06',
     compId: 'Scene06-KonsepRasional',
     code: 'Scene 06',
     part: 2,
     partName: 'Part 2: Rasional (Ikhsan)',
-    startMin: 16,
-    endMin: 20,
+    startMin: 17,
+    endMin: 20.5,
     presenter: 'ikhsan',
     title: 'Pengertian Pertidaksamaan Rasional, Titik Kritis & Tabel Uji Tanda',
     boardTitle: 'PERTIDAKSAMAAN RASIONAL (PECAHAN ALJABAR)',
     boardSubtitle: 'Pemateri: Ikhsan • Bentuk Umum f(x)/g(x) > 0 dengan Syarat Mutlak g(x) ≠ 0',
     visualType: 'sign-table',
-    voScript: 'Siap, thank you, Rafie! Oke teman-teman, sekarang kita masuk ke jenis kedua yaitu Pertidaksamaan Rasional. Beda sama yang linear, di sini bentuk matematikanya berupa pecahan f(x)/g(x). Aturan paling penting: penyebutnya nggak boleh sama dengan nol!',
+    voScript: 'Oke teman-teman, beda sama yang linear tadi, di Pertidaksamaan Rasional ini bentuk matematikanya berupa pecahan f(x)/g(x). Kita harus mencari titik kritis dari pembilang dan penyebut, lalu melakukan uji tanda pada garis bilangan.',
     steps: [
       {
         label: 'Pengertian & Syarat Penyebut Pertidaksamaan Rasional',
@@ -375,13 +466,15 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 10. SCENE 07A: SOAL RASIONAL 1, 2 & 3
   {
     id: 'scene-07a',
     compId: 'Scene07A-SoalRasional123',
     code: 'Scene 07A',
     part: 2,
     partName: 'Part 2: Rasional (Ikhsan)',
-    startMin: 20,
+    startMin: 20.5,
     endMin: 25.5,
     presenter: 'ikhsan',
     title: 'Pembahasan Contoh Soal 1, 2 & 3 Pertidaksamaan Rasional',
@@ -426,6 +519,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 11. SCENE 07B: SOAL RASIONAL 4 & 5
   {
     id: 'scene-07b',
     compId: 'Scene07B-SoalRasional45',
@@ -479,20 +574,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 12. SCENE 08A: INTRO SOLO PRAS (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-08a-intro-pras',
+    compId: 'Scene08A-IntroPras',
+    code: 'Scene 08A (Intro Pras)',
+    part: 3,
+    partName: 'Part 3: Irasional (Pras)',
+    startMin: 31,
+    endMin: 32,
+    presenter: 'pras',
+    title: 'Scene Intro Pemateri 3: Pras (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 3: PRAS',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Irasional (Bentuk Akar)',
+    visualType: 'presenter-intro',
+    voScript: 'Oke, makasih Ikhsan! Halo semuanya, kenalin gw Pras! Sekarang kita masuk ke cabang ketiga yaitu Pertidaksamaan Irasional atau bentuk akar. Kunci utama nyelesaiin soal ini ada dua: wajib cek Syarat Numerus di dalam akar harus lebih besar atau sama dengan nol, baru kita kuadratin kedua ruas! Yuk simak pembahasannya!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 3: Pras',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Irasional (Bentuk Akar): √f(x) < c  &  √f(x) ≤ √g(x)',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Pras di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Syarat Numerus f(x) ≥ 0 & Irisan Himpunan Penyelesaian',
+        badge: 'Highlight Topik',
+        eq: 'Syarat Akar: f(x) ≥ 0  ∩  Kuadrat Ruas  =  Himpunan Penyelesaian (HP)',
+        desc: 'Membahas cara mencari irisan solusi pada garis bilangan untuk 1 akar maupun 2 akar.'
+      }
+    ]
+  },
+
+  // 13. SCENE 08: KONSEP IRASIONAL (PRAS + PAPAN TULIS)
   {
     id: 'scene-08',
     compId: 'Scene08-KonsepIrasional',
     code: 'Scene 08',
     part: 3,
     partName: 'Part 3: Irasional (Pras)',
-    startMin: 31,
+    startMin: 32,
     endMin: 36,
     presenter: 'pras',
     title: 'Pengertian Pertidaksamaan Irasional & Syarat Utama Numerus',
     boardTitle: 'PERTIDAKSAMAAN IRASIONAL (BENTUK AKAR)',
     boardSubtitle: 'Pemateri: Pras • Syarat Mutlak Numerus f(x) ≥ 0 & Hasil Akar √f(x) ≥ 0',
     visualType: 'concept-box',
-    voScript: 'Oke, makasih Ikhsan. Halo semuanya, gw Pras! Sekarang kita bahas Pertidaksamaan Irasional atau bentuk akar. Kunci utama buat nyelesaiin soal ini ada dua syarat: kuadratin kedua ruas, dan syarat numerus yaitu nilai di dalam akar wajib lebih besar atau sama dengan nol!',
+    voScript: 'Di papan tulis kita bisa lihat, pertidaksamaan irasional memuat variabel di dalam tanda akar. Jangan pernah langsung mengkuadratkan kedua ruas sebelum kalian menuliskan syarat numerus f(x) ≥ 0!',
     steps: [
       {
         label: 'Pengertian Pertidaksamaan Irasional (Bentuk Akar)',
@@ -514,6 +642,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 14. SCENE 09A: SOAL IRASIONAL 1 & 2
   {
     id: 'scene-09a',
     compId: 'Scene09A-SoalIrasional12',
@@ -562,6 +692,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 15. SCENE 09B: SOAL IRASIONAL 3, 4 & 5
   {
     id: 'scene-09b',
     compId: 'Scene09B-SoalIrasional345',
@@ -609,20 +741,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 16. SCENE 10A: INTRO SOLO DIMAS (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-10a-intro-dimas',
+    compId: 'Scene10A-IntroDimas',
+    code: 'Scene 10A (Intro Dimas)',
+    part: 4,
+    partName: 'Part 4: Mutlak & Closing',
+    startMin: 45,
+    endMin: 46,
+    presenter: 'dimas',
+    title: 'Scene Intro Pemateri 4: Dimas (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 4: DIMAS',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Nilai Mutlak |f(x)|',
+    visualType: 'presenter-intro',
+    voScript: 'Mantap, Pras! Halo semuanya, kenalin gw Dimas! Di bagian keempat ini kita bakal mengupas tuntas Pertidaksamaan Nilai Mutlak. Konsep dasarnya, nilai mutlak itu mengukur jarak suatu bilangan dari titik nol, jadi nilainya nggak mungkin negatif! Yuk langsung kita lihat rumusnya di papan tulis!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 4: Dimas',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Nilai Mutlak: |f(x)| < a   &   |f(x)| ≥ a',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Dimas di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Konsep Jarak Fisik, Rumus Sifat & Evaluasi Kesalahan Umum',
+        badge: 'Highlight Topik',
+        eq: 'Tanda < (Mengumpul di Tengah)  vs  Tanda > (Memencar Kiri & Kanan)',
+        desc: 'Membedah 5 contoh soal nilai mutlak termasuk jebakan konstanta negatif |x| < −5.'
+      }
+    ]
+  },
+
+  // 17. SCENE 10: KONSEP NILAI MUTLAK (DIMAS + PAPAN TULIS)
   {
     id: 'scene-10',
     compId: 'Scene10-KonsepMutlak',
     code: 'Scene 10',
     part: 4,
     partName: 'Part 4: Mutlak & Closing',
-    startMin: 45,
+    startMin: 46,
     endMin: 49.5,
     presenter: 'dimas',
     title: 'Pengertian Pertidaksamaan Nilai Mutlak, Konsep Jarak & Tabel Sifat',
     boardTitle: 'PERTIDAKSAMAAN NILAI MUTLAK |f(x)|',
     boardSubtitle: 'Pemateri: Dimas • Prinsip Jarak dari Titik Nol (|x| ≥ 0) & Karakteristik Tanda',
     visualType: 'mutlak-table',
-    voScript: 'Mantap, Pras! Halo semuanya, gw Dimas. Konsep dasarnya, nilai mutlak itu nunjukin jarak suatu angka dari titik nol di garis bilangan. Karena ngomongin jarak fisik, nilainya pasti selalu positif atau minimal nol! Kalau tandanya kurang dari (<), daerahnya ngumpul di tengah. Kalau lebih dari (>), daerahnya mencar ke kiri dan kanan.',
+    voScript: 'Perhatikan tabel di papan tulis: kalau tandanya kurang dari (<), daerah penyelesaiannya ngumpul di tengah-tengah. Tapi kalau tandanya lebih dari (>), daerah penyelesaiannya memencar ke arah kiri dan kanan.',
     steps: [
       {
         label: 'Pengertian & Konsep Dasar Jarak Fisik dari Titik Nol',
@@ -644,6 +809,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 18. SCENE 11A: SOAL MUTLAK 1 & 2
   {
     id: 'scene-11a',
     compId: 'Scene11A-SoalMutlak12',
@@ -692,6 +859,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 19. SCENE 11B: SOAL MUTLAK 3, 4 & 5
   {
     id: 'scene-11b',
     compId: 'Scene11B-SoalMutlak345',
@@ -743,6 +912,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 20. SCENE 12: CLOSING SUMMARY
   {
     id: 'scene-12',
     compId: 'Scene12-ClosingSummary',
@@ -782,945 +953,50 @@ export const SCENES_DATA: SceneItem[] = [
 `,
 
   // ==========================================================================
-  // 2. KOMPONEN KARAKTER 2D PERSIS PREVIEW (DENGAN SKALA & MENAPAK DI LANTAI)
-  // ==========================================================================
-  'src/components/TeacherCharacter.tsx': `import React from 'react';
-import { CHARACTERS_INFO } from '../data/scenesData';
-
-export const TeacherCharacter: React.FC<{
-  type: 'ikhsan' | 'rafie' | 'pras' | 'dimas';
-  isSpeaking?: boolean;
-  isActive?: boolean;
-  frame?: number;
-}> = ({ type = 'rafie', isSpeaking = true, isActive = true, frame = 0 }) => {
-  const safeType = CHARACTERS_INFO[type] ? type : 'rafie';
-  const info = CHARACTERS_INFO[safeType];
-
-  const mouthOpen = isSpeaking ? Math.abs(Math.sin(frame * 0.45)) * 5 + 2 : 1.5;
-  const armWave = isSpeaking ? Math.sin(frame * 0.2) * 3 : 0;
-
-  const skinColor =
-    safeType === 'pras' ? '#c68652' : safeType === 'dimas' ? '#cc8e59' : '#f1b88a';
-  const bodyWidth = safeType === 'dimas' ? 88 : 74;
-  const bodyX = 100 - bodyWidth / 2;
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        userSelect: 'none'
-      }}
-    >
-      <div
-        style={{
-          marginBottom: 4,
-          padding: '2px 10px',
-          borderRadius: 6,
-          fontWeight: 900,
-          fontSize: 13,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          backgroundColor: isActive ? 'rgba(2, 6, 23, 0.92)' : 'rgba(15, 23, 42, 0.75)',
-          color: isActive ? '#ffffff' : '#cbd5e1',
-          border: isActive ? '2px solid #ffffff' : '1px solid #475569',
-          boxShadow: '0 6px 14px rgba(0,0,0,0.35)'
-        }}
-      >
-        {info.name}
-      </div>
-
-      <svg
-        viewBox="0 0 200 320"
-        style={{ width: '100%', height: '100%', maxHeight: 295, overflow: 'visible' }}
-      >
-        <ellipse cx="100" cy="308" rx="48" ry="8" fill="rgba(0,0,0,0.28)" />
-
-        <rect x={100 - bodyWidth * 0.38} y="205" width="24" height="88" rx="6" fill="#293548" stroke="#0f172a" strokeWidth="3" />
-        <rect x={100 + bodyWidth * 0.38 - 24} y="205" width="24" height="88" rx="6" fill="#293548" stroke="#0f172a" strokeWidth="3" />
-
-        <path
-          d={\`M \${100 - bodyWidth * 0.38 - 6} 292 Q \${100 - bodyWidth * 0.38 + 10} 285 \${100 - bodyWidth * 0.38 + 26} 292 L \${100 - bodyWidth * 0.38 + 28} 305 L \${100 - bodyWidth * 0.38 - 8} 305 Z\`}
-          fill={safeType === 'rafie' ? '#4a3728' : safeType === 'pras' ? '#854d27' : '#334155'}
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-        <path
-          d={\`M \${100 + bodyWidth * 0.38 - 26} 292 Q \${100 + bodyWidth * 0.38 - 10} 285 \${100 + bodyWidth * 0.38 + 6} 292 L \${100 + bodyWidth * 0.38 + 8} 305 L \${100 + bodyWidth * 0.38 - 28} 305 Z\`}
-          fill={safeType === 'rafie' ? '#4a3728' : safeType === 'pras' ? '#854d27' : '#334155'}
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-
-        <rect
-          x={bodyX + 8}
-          y="108"
-          width={bodyWidth - 16}
-          height="102"
-          rx="8"
-          fill={
-            safeType === 'rafie'
-              ? '#f8fafc'
-              : safeType === 'ikhsan'
-              ? '#e5dec9'
-              : safeType === 'pras'
-              ? '#263238'
-              : '#1e293b'
-          }
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-
-        {safeType === 'ikhsan' && (
-          <g stroke="#9a3412" strokeWidth="1.5" opacity="0.55">
-            <line x1="92" y1="115" x2="108" y2="135" />
-            <line x1="108" y1="115" x2="92" y2="135" />
-            <line x1="92" y1="145" x2="108" y2="165" />
-            <line x1="108" y1="145" x2="92" y2="165" />
-            <line x1="92" y1="175" x2="108" y2="195" />
-          </g>
-        )}
-
-        {(safeType === 'rafie' || safeType === 'pras') && (
-          <g>
-            <polygon
-              points="86,106 100,124 94,130 80,112"
-              fill={safeType === 'rafie' ? '#ffffff' : '#1e293b'}
-              stroke="#0f172a"
-              strokeWidth="2.5"
-            />
-            <polygon
-              points="114,106 100,124 106,130 120,112"
-              fill={safeType === 'rafie' ? '#ffffff' : '#1e293b'}
-              stroke="#0f172a"
-              strokeWidth="2.5"
-            />
-          </g>
-        )}
-
-        <path
-          d={\`M \${bodyX} 112 Q \${bodyX + 10} 104 \${bodyX + 26} 108 L \${bodyX + 28} 214 L \${bodyX - 2} 214 Z\`}
-          fill="#7ec8f8"
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-        <path
-          d={\`M \${bodyX + bodyWidth} 112 Q \${bodyX + bodyWidth - 10} 104 \${bodyX + bodyWidth - 26} 108 L \${bodyX + bodyWidth - 28} 214 L \${bodyX + bodyWidth + 2} 214 Z\`}
-          fill="#7ec8f8"
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-        <polygon points={\`\${bodyX + 14},108 \${bodyX + 28},108 \${bodyX + 28},158 \${bodyX + 10},138\`} fill="#60b5f2" stroke="#0f172a" strokeWidth="2.5" />
-        <polygon points={\`\${bodyX + bodyWidth - 14},108 \${bodyX + bodyWidth - 28},108 \${bodyX + bodyWidth - 28},158 \${bodyX + bodyWidth - 10},138\`} fill="#60b5f2" stroke="#0f172a" strokeWidth="2.5" />
-
-        <g transform={\`rotate(\${armWave}, \${bodyX}, 125)\`}>
-          <path
-            d={\`M \${bodyX + 2} 115 L \${bodyX - 18} 165 L \${bodyX + 14} 172 L \${bodyX + 14} 135\`}
-            fill="#7ec8f8"
-            stroke="#0f172a"
-            strokeWidth="3"
-            strokeLinejoin="round"
-          />
-          <circle cx={bodyX + 18} cy="170" r="8" fill={skinColor} stroke="#0f172a" strokeWidth="2.5" />
-        </g>
-
-        <g transform={\`rotate(\${-armWave * 1.2}, \${bodyX + bodyWidth}, 125)\`}>
-          <path
-            d={\`M \${bodyX + bodyWidth - 2} 115 L \${bodyX + bodyWidth + 26} 152 L \${bodyX + bodyWidth + 16} 168 L \${bodyX + bodyWidth - 10} 140\`}
-            fill="#7ec8f8"
-            stroke="#0f172a"
-            strokeWidth="3"
-            strokeLinejoin="round"
-          />
-          <circle cx={bodyX + bodyWidth + 24} cy="154" r="8" fill={skinColor} stroke="#0f172a" strokeWidth="2.5" />
-
-          {safeType === 'rafie' && (
-            <rect
-              x="82"
-              y="148"
-              width="34"
-              height="42"
-              rx="4"
-              transform="rotate(10 98 168)"
-              fill="#64748b"
-              stroke="#0f172a"
-              strokeWidth="2.5"
-            />
-          )}
-
-          {safeType === 'ikhsan' && (
-            <line
-              x1={bodyX + bodyWidth + 24}
-              y1="154"
-              x2={bodyX + bodyWidth + 46}
-              y2="132"
-              stroke="#1e293b"
-              strokeWidth="4.5"
-              strokeLinecap="round"
-            />
-          )}
-        </g>
-
-        <rect x="91" y="92" width="18" height="20" rx="4" fill={skinColor} stroke="#0f172a" strokeWidth="2.5" />
-        <ellipse
-          cx="100"
-          cy="64"
-          rx={safeType === 'dimas' ? 31 : 28}
-          ry="32"
-          fill={skinColor}
-          stroke="#0f172a"
-          strokeWidth="3"
-        />
-
-        <circle cx={100 - (safeType === 'dimas' ? 31 : 28)} cy="66" r="6" fill={skinColor} stroke="#0f172a" strokeWidth="2.5" />
-        <circle cx={100 + (safeType === 'dimas' ? 31 : 28)} cy="66" r="6" fill={skinColor} stroke="#0f172a" strokeWidth="2.5" />
-
-        <path d="M 82 52 Q 88 49 94 52" fill="none" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
-        <path d="M 106 52 Q 112 49 118 52" fill="none" stroke="#0f172a" strokeWidth="2.5" strokeLinecap="round" />
-        <circle cx="88" cy="60" r="3" fill="#0f172a" />
-        <circle cx="112" cy="60" r="3" fill="#0f172a" />
-
-        {(safeType === 'ikhsan' || safeType === 'rafie') && (
-          <g stroke="#1e293b" strokeWidth="2.3" fill="rgba(255,255,255,0.18)">
-            <circle cx="88" cy="60" r="8.5" />
-            <circle cx="112" cy="60" r="8.5" />
-            <line x1="96.5" y1="60" x2="103.5" y2="60" />
-          </g>
-        )}
-
-        <path d="M 100 62 L 98 70 L 102 70" fill="none" stroke="#0f172a" strokeWidth="2" strokeLinecap="round" />
-        <ellipse cx="100" cy="79" rx="7" ry={mouthOpen} fill="#991b1b" stroke="#0f172a" strokeWidth="2" />
-
-        {safeType === 'ikhsan' && (
-          <path
-            d="M 68 58 Q 66 26 100 25 Q 134 26 132 58 Q 120 46 112 54 Q 102 44 96 54 Q 84 45 68 58 Z"
-            fill="#1e293b"
-            stroke="#0f172a"
-            strokeWidth="3"
-          />
-        )}
-        {safeType === 'rafie' && (
-          <path
-            d="M 70 56 Q 68 24 100 26 Q 132 24 130 56 Q 116 38 100 46 Q 84 38 70 56 Z"
-            fill="#1c1917"
-            stroke="#0f172a"
-            strokeWidth="3"
-          />
-        )}
-        {safeType === 'pras' && (
-          <path
-            d="M 70 56 Q 65 32 82 28 Q 95 18 110 26 Q 128 24 130 56 Q 116 40 98 42 Q 82 40 70 56 Z"
-            fill="#18181b"
-            stroke="#0f172a"
-            strokeWidth="3"
-          />
-        )}
-        {safeType === 'dimas' && (
-          <path
-            d="M 69 54 Q 70 27 100 27 Q 130 27 131 54 Q 115 38 100 38 Q 85 38 69 54 Z"
-            fill="#27272a"
-            stroke="#0f172a"
-            strokeWidth="3"
-          />
-        )}
-      </svg>
-    </div>
-  );
-};
-`,
-
-  // ==========================================================================
-  // 3. PAPAN TULIS 2 KOLOM PERSIS PREVIEW (RUMUS KIRI + GRAFIK KANAN)
-  // ==========================================================================
-  'src/components/ChalkboardVisualizer.tsx': `import React from 'react';
-import { SceneItem, CHARACTERS_INFO } from '../data/scenesData';
-
-export const ChalkboardVisualizer: React.FC<{
-  scene: SceneItem;
-  activeStepIndex: number;
-  stepProgress: number;
-}> = ({ scene, activeStepIndex, stepProgress }) => {
-  const currentStep = scene.steps[activeStepIndex] || scene.steps[0];
-  const isTransitioning = stepProgress < 0.15;
-
-  return (
-    <div
-      style={{
-        position: 'relative',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'space-between',
-        padding: '14px 20px',
-        color: '#f1f5f9',
-        overflow: 'hidden',
-        fontFamily: 'Inter, system-ui, sans-serif'
-      }}
-    >
-      {/* Efek Kapur Halus */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          pointerEvents: 'none',
-          opacity: 0.12,
-          backgroundImage:
-            'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4), transparent 55%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.3), transparent 50%)'
-        }}
-      />
-
-      {/* HEADER PAPAN TULIS */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          borderBottom: '1px solid rgba(167, 243, 208, 0.25)',
-          paddingBottom: 8,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 8
-        }}
-      >
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span
-              style={{
-                padding: '2px 8px',
-                fontSize: 10,
-                fontWeight: 800,
-                textTransform: 'uppercase',
-                borderRadius: 4,
-                backgroundColor: 'rgba(251, 191, 36, 0.2)',
-                color: '#fcd34d',
-                border: '1px solid rgba(252, 211, 77, 0.4)'
-              }}
-            >
-              {scene.code} • {scene.partName}
-            </span>
-            <span
-              style={{
-                padding: '2px 8px',
-                fontSize: 10,
-                fontWeight: 700,
-                borderRadius: 4,
-                backgroundColor: 'rgba(2, 44, 34, 0.85)',
-                color: '#6ee7b7',
-                border: '1px solid rgba(16, 185, 129, 0.35)'
-              }}
-            >
-              Langkah {activeStepIndex + 1} / {scene.steps.length}
-            </span>
-          </div>
-          <h2
-            style={{
-              fontSize: 18,
-              fontWeight: 900,
-              letterSpacing: '0.02em',
-              color: '#ffffff',
-              margin: '4px 0 2px 0'
-            }}
-          >
-            {scene.boardTitle}
-          </h2>
-          <p style={{ fontSize: 11, color: 'rgba(167, 243, 208, 0.85)', margin: 0 }}>
-            {scene.boardSubtitle}
-          </p>
-        </div>
-
-        <div>
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '4px 10px',
-              borderRadius: 999,
-              fontSize: 10,
-              fontWeight: 800,
-              backgroundColor: isTransitioning ? 'rgba(251, 191, 36, 0.25)' : 'rgba(2, 44, 34, 0.9)',
-              color: isTransitioning ? '#fde68a' : '#a7f3d0',
-              border: isTransitioning
-                ? '1px solid rgba(252, 211, 77, 0.5)'
-                : '1px solid rgba(52, 211, 153, 0.4)'
-            }}
-          >
-            {isTransitioning ? '✨ ANIMASI TRANSISI RUMUS' : '🔒 HOLD FRAME (STATIC VO SYNC)'}
-          </span>
-        </div>
-      </div>
-
-      {/* ISI TENGAH PAPAN TULIS: 2 KOLOM (KIRI RUMUS & LANGKAH, KANAN DIAGRAM) */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          flex: 1,
-          display: 'grid',
-          gridTemplateColumns: '5fr 5fr',
-          gap: 14,
-          margin: '10px 0',
-          alignItems: 'center'
-        }}
-      >
-        {/* KOLOM KIRI: KOTAK RUMUS KAPUR + 3 DAFTAR LANGKAH */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div
-            style={{
-              padding: 12,
-              borderRadius: 12,
-              backgroundColor: 'rgba(2, 44, 34, 0.68)',
-              border: '2px solid rgba(110, 231, 183, 0.3)',
-              opacity: Math.min(1, stepProgress * 8 + 0.25),
-              transform: \`translateY(\${Math.max(0, (1 - stepProgress * 6) * 8)}px)\`
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: 6
-              }}
-            >
-              <span
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#fcd34d'
-                }}
-              >
-                {currentStep.label}
-              </span>
-              <span
-                style={{
-                  padding: '2px 6px',
-                  fontSize: 9,
-                  fontWeight: 700,
-                  borderRadius: 4,
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                  color: '#d1fae5'
-                }}
-              >
-                {currentStep.badge}
-              </span>
-            </div>
-
-            <div
-              style={{
-                padding: '10px 12px',
-                borderRadius: 8,
-                backgroundColor: 'rgba(0,0,0,0.4)',
-                border: '1px solid rgba(255,255,255,0.18)',
-                fontFamily: 'Fira Code, Consolas, monospace',
-                fontSize: 13.5,
-                fontWeight: 800,
-                color: '#fde68a',
-                lineHeight: 1.45
-              }}
-            >
-              {currentStep.eq}
-            </div>
-
-            <p
-              style={{
-                marginTop: 8,
-                marginBottom: 0,
-                fontSize: 11.5,
-                color: '#ecfdf5',
-                lineHeight: 1.45
-              }}
-            >
-              {currentStep.desc}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-            {scene.steps.map((st, idx) => {
-              const isCurrent = idx === activeStepIndex;
-              const isDone = idx < activeStepIndex;
-              return (
-                <div
-                  key={idx}
-                  style={{
-                    padding: '6px 10px',
-                    borderRadius: 8,
-                    fontSize: 11,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    backgroundColor: isCurrent
-                      ? 'rgba(251, 191, 36, 0.22)'
-                      : isDone
-                      ? 'rgba(6, 78, 59, 0.45)'
-                      : 'rgba(0,0,0,0.22)',
-                    border: isCurrent
-                      ? '1px solid rgba(252, 211, 77, 0.65)'
-                      : isDone
-                      ? '1px solid rgba(16, 185, 129, 0.35)'
-                      : '1px solid rgba(255,255,255,0.1)',
-                    color: isCurrent ? '#ffffff' : isDone ? '#a7f3d0' : 'rgba(203,213,225,0.65)',
-                    fontWeight: isCurrent ? 800 : 500
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span
-                      style={{
-                        width: 18,
-                        height: 18,
-                        borderRadius: 999,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 9,
-                        fontWeight: 900,
-                        backgroundColor: isCurrent
-                          ? '#fbbf24'
-                          : isDone
-                          ? '#10b981'
-                          : 'rgba(255,255,255,0.12)',
-                        color: isCurrent || isDone ? '#020617' : '#ffffff'
-                      }}
-                    >
-                      {isDone ? '✓' : idx + 1}
-                    </span>
-                    <span>{st.label}</span>
-                  </div>
-                  <span style={{ fontSize: 9.5, opacity: 0.8 }}>{st.badge}</span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* KOLOM KANAN: GARIS BILANGAN / KARTESIUS / TABEL UJI TANDA */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          {scene.visualType === 'number-line' && scene.numberLineConfig && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                backgroundColor: 'rgba(2, 6, 23, 0.72)',
-                border: '1px solid rgba(52, 211, 153, 0.35)'
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#6ee7b7',
-                  marginBottom: 6,
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>VISUALISASI GARIS BILANGAN & UJI TANDA</span>
-                <span style={{ fontSize: 10, color: '#fcd34d' }}>○ Terbuka | ● Tertutup</span>
-              </div>
-              <svg viewBox="0 0 420 120" style={{ width: '100%', height: 112, overflow: 'visible' }}>
-                {scene.numberLineConfig.shades.map((sh, i) => {
-                  const mapX = (val: number) => 210 + val * 28;
-                  const x1 = Math.max(25, Math.min(395, mapX(sh.from)));
-                  const x2 = Math.max(25, Math.min(395, mapX(sh.to)));
-                  const width = Math.max(10, x2 - x1);
-                  return (
-                    <g key={i}>
-                      <rect
-                        x={x1}
-                        y="32"
-                        width={width}
-                        height="34"
-                        rx="4"
-                        fill="rgba(16, 185, 129, 0.28)"
-                        stroke="#34d399"
-                        strokeWidth="1.5"
-                        strokeDasharray="4 2"
-                      />
-                      <text
-                        x={x1 + width / 2}
-                        y="24"
-                        textAnchor="middle"
-                        fill="#6ee7b7"
-                        fontSize="10"
-                        fontWeight="bold"
-                      >
-                        {sh.label}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                <line x1="20" y1="66" x2="400" y2="66" stroke="#f8fafc" strokeWidth="3" />
-                <polygon points="15,66 26,60 26,72" fill="#f8fafc" />
-                <polygon points="405,66 394,60 394,72" fill="#f8fafc" />
-
-                {scene.numberLineConfig.signs.map((sg, idx) => {
-                  const cx = 210 + sg.x * 28;
-                  const isPos = sg.sign === '+';
-                  return (
-                    <g key={idx} transform={\`translate(\${cx}, 46)\`}>
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r="11"
-                        fill={isPos ? 'rgba(16,185,129,0.25)' : 'rgba(244,63,94,0.25)'}
-                        stroke={isPos ? '#34d399' : '#fb7185'}
-                        strokeWidth="1.5"
-                      />
-                      <text
-                        x="0"
-                        y="4"
-                        textAnchor="middle"
-                        fill={isPos ? '#6ee7b7' : '#fda4af'}
-                        fontSize="13"
-                        fontWeight="900"
-                      >
-                        {sg.sign}
-                      </text>
-                    </g>
-                  );
-                })}
-
-                {scene.numberLineConfig.points.map((pt, idx) => {
-                  const cx = 210 + pt.val * 28;
-                  return (
-                    <g key={idx} transform={\`translate(\${cx}, 66)\`}>
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r="7"
-                        fill={pt.filled ? '#fbbf24' : '#064e3b'}
-                        stroke="#fbbf24"
-                        strokeWidth="3"
-                      />
-                      <text
-                        x="0"
-                        y="25"
-                        textAnchor="middle"
-                        fill="#fde68a"
-                        fontSize="11"
-                        fontWeight="bold"
-                      >
-                        {pt.label}
-                      </text>
-                    </g>
-                  );
-                })}
-              </svg>
-              <div
-                style={{
-                  marginTop: 4,
-                  fontSize: 10.5,
-                  textAlign: 'center',
-                  color: '#a7f3d0',
-                  fontWeight: 700,
-                  backgroundColor: 'rgba(2, 44, 34, 0.85)',
-                  padding: '4px 8px',
-                  borderRadius: 6,
-                  border: '1px solid rgba(16, 185, 129, 0.3)'
-                }}
-              >
-                {scene.numberLineConfig.caption}
-              </div>
-            </div>
-          )}
-
-          {scene.visualType === 'cartesian-pldv' && scene.cartesianConfig && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                backgroundColor: 'rgba(2, 6, 23, 0.72)',
-                border: '1px solid rgba(52, 211, 153, 0.35)'
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#6ee7b7',
-                  marginBottom: 6,
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>BIDANG KARTESIUS 2D (DAERAH HIMPUNAN PENYELESAIAN)</span>
-                <span style={{ color: '#fcd34d', fontSize: 10 }}>{scene.cartesianConfig.equation}</span>
-              </div>
-              <svg
-                viewBox="0 0 360 175"
-                style={{
-                  width: '100%',
-                  height: 140,
-                  backgroundColor: 'rgba(15, 23, 42, 0.92)',
-                  borderRadius: 8,
-                  border: '1px solid #334155'
-                }}
-              >
-                <g stroke="#1e293b" strokeWidth="1">
-                  <line x1="0" y1="35" x2="360" y2="35" />
-                  <line x1="0" y1="70" x2="360" y2="70" />
-                  <line x1="0" y1="105" x2="360" y2="105" />
-                  <line x1="0" y1="140" x2="360" y2="140" />
-                  <line x1="70" y1="0" x2="70" y2="175" />
-                  <line x1="140" y1="0" x2="140" y2="175" />
-                  <line x1="210" y1="0" x2="210" y2="175" />
-                  <line x1="280" y1="0" x2="280" y2="175" />
-                </g>
-                <line x1="20" y1="105" x2="340" y2="105" stroke="#94a3b8" strokeWidth="2" />
-                <line x1="140" y1="12" x2="140" y2="165" stroke="#94a3b8" strokeWidth="2" />
-                <text x="332" y="98" fill="#cbd5e1" fontSize="10" fontWeight="bold">X</text>
-                <text x="146" y="22" fill="#cbd5e1" fontSize="10" fontWeight="bold">Y</text>
-
-                {scene.cartesianConfig.mode === 'case1' ? (
-                  <>
-                    <polygon points="90,35 280,122 90,155" fill="rgba(56, 189, 248, 0.25)" />
-                    <line x1="90" y1="35" x2="280" y2="122" stroke="#38bdf8" strokeWidth="3.5" />
-                    <circle cx="140" cy="58" r="4.5" fill="#fbbf24" />
-                    <text x="148" y="56" fill="#fde68a" fontSize="10" fontWeight="bold">(0,2)</text>
-                    <circle cx="245" cy="105" r="4.5" fill="#fbbf24" />
-                    <text x="235" y="122" fill="#fde68a" fontSize="10" fontWeight="bold">(5,0)</text>
-                    <circle cx="140" cy="105" r="5" fill="#10b981" />
-                    <text x="82" y="120" fill="#6ee7b7" fontSize="10" fontWeight="bold">Uji (0,0) ✅ DHP</text>
-                  </>
-                ) : (
-                  <>
-                    <polygon points="140,152 245,45 330,45 330,152" fill="rgba(244, 63, 94, 0.25)" />
-                    <line x1="140" y1="152" x2="245" y2="45" stroke="#fb7185" strokeWidth="3.5" strokeDasharray="7 5" />
-                    <circle cx="140" cy="152" r="4.5" fill="#fbbf24" />
-                    <text x="102" y="156" fill="#fde68a" fontSize="10" fontWeight="bold">(0,−4)</text>
-                    <circle cx="205" cy="105" r="4.5" fill="#fbbf24" />
-                    <text x="195" y="96" fill="#fde68a" fontSize="10" fontWeight="bold">(3,0)</text>
-                    <circle cx="140" cy="105" r="4.5" fill="#f43f5e" />
-                    <text x="75" y="96" fill="#fda4af" fontSize="10" fontWeight="bold">Uji (0,0) ❌</text>
-                    <text x="245" y="132" fill="#fda4af" fontSize="11" fontWeight="bold">DHP (Arsir)</text>
-                  </>
-                )}
-              </svg>
-              <div style={{ marginTop: 6, fontSize: 10.5, textAlign: 'center', color: '#fde68a', fontWeight: 700 }}>
-                {scene.cartesianConfig.testText}
-              </div>
-            </div>
-          )}
-
-          {scene.visualType === 'sign-table' && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                backgroundColor: 'rgba(2, 6, 23, 0.72)',
-                border: '1px solid rgba(52, 211, 153, 0.35)'
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#6ee7b7',
-                  marginBottom: 8,
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>TABEL UJI TANDA PECAHAN RASIONAL f(x)/g(x)</span>
-                <span style={{ fontSize: 10, color: '#fda4af', fontWeight: 900 }}>Syarat Mutlak: g(x) ≠ 0</span>
-              </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5 }}>
-                <thead>
-                  <tr style={{ backgroundColor: 'rgba(6, 78, 59, 0.85)', color: '#d1fae5', textAlign: 'left' }}>
-                    <th style={{ padding: 7 }}>Pembilang f(x)</th>
-                    <th style={{ padding: 7 }}>Penyebut g(x)</th>
-                    <th style={{ padding: 7 }}>Hasil f(x)/g(x)</th>
-                  </tr>
-                </thead>
-                <tbody style={{ backgroundColor: 'rgba(0,0,0,0.35)', fontWeight: 700 }}>
-                  <tr>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#34d399', fontWeight: 900 }}>Positif (+)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fda4af' }}>Negatif (−)</td>
-                    <td style={{ padding: 6, color: '#6ee7b7' }}>Positif (+)</td>
-                    <td style={{ padding: 6, color: '#fb7185', fontWeight: 900 }}>Negatif (−)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {scene.visualType === 'mutlak-table' && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                backgroundColor: 'rgba(2, 6, 23, 0.72)',
-                border: '1px solid rgba(52, 211, 153, 0.35)'
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  color: '#fcd34d',
-                  marginBottom: 8,
-                  display: 'flex',
-                  justifyContent: 'space-between'
-                }}
-              >
-                <span>TABEL RUMUS ACUAN CEPAT NILAI MUTLAK (Syarat: a ≥ 0)</span>
-                <span style={{ fontSize: 10, color: '#6ee7b7' }}>Prinsip Jarak ≥ 0</span>
-              </div>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
-                <thead>
-                  <tr style={{ backgroundColor: 'rgba(6, 78, 59, 0.85)', color: '#ffffff', textAlign: 'left' }}>
-                    <th style={{ padding: 6 }}>Bentuk Soal</th>
-                    <th style={{ padding: 6 }}>Sifat Aljabar</th>
-                    <th style={{ padding: 6 }}>Visualisasi Grafik</th>
-                  </tr>
-                </thead>
-                <tbody style={{ backgroundColor: 'rgba(0,0,0,0.35)', fontWeight: 600 }}>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &lt; a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>−a &lt; f(x) &lt; a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Mengumpul di tengah (Terbuka)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≤ a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>−a ≤ f(x) ≤ a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Mengumpul di tengah (Tertutup)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| &gt; a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) &lt; −a ∪ f(x) &gt; a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Memencar kiri & kanan (Terbuka)</td>
-                  </tr>
-                  <tr>
-                    <td style={{ padding: 6, color: '#fcd34d', fontFamily: 'monospace' }}>|f(x)| ≥ a</td>
-                    <td style={{ padding: 6, color: '#a7f3d0', fontFamily: 'monospace' }}>f(x) ≤ −a ∪ f(x) ≥ a</td>
-                    <td style={{ padding: 6, color: '#e2e8f0' }}>Memencar kiri & kanan (Tertutup)</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {(scene.visualType === 'intro-school' ||
-            scene.visualType === 'concept-box' ||
-            scene.visualType === 'summary-master') && (
-            <div
-              style={{
-                padding: 12,
-                borderRadius: 12,
-                backgroundColor: 'rgba(2, 6, 23, 0.72)',
-                border: '1px solid rgba(52, 211, 153, 0.35)'
-              }}
-            >
-              <div style={{ fontSize: 11, fontWeight: 900, color: '#fcd34d', marginBottom: 8 }}>
-                MATRIKS 4 CABANG UTAMA PERTIDAKSAMAAN (60 MENIT)
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 11 }}>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div style={{ fontWeight: 900, color: '#93c5fd' }}>1. Linear (Rafie)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    PLSV Garis Bilangan & PLDV Uji Titik (0,0). Kali/bagi negatif balik tanda!
-                  </div>
-                </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div style={{ fontWeight: 900, color: '#6ee7b7' }}>2. Rasional (Ikhsan)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Pecahan f(x)/g(x) dengan syarat mutlak penyebut g(x) ≠ 0 & dilarang kali silang.
-                  </div>
-                </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div style={{ fontWeight: 900, color: '#fcd34d' }}>3. Irasional (Pras)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Bentuk akar √f(x) wajib memenuhi Syarat Numerus f(x) ≥ 0 & irisan (∩) solusi.
-                  </div>
-                </div>
-                <div style={{ padding: 8, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
-                  <div style={{ fontWeight: 900, color: '#f9a8d4' }}>4. Nilai Mutlak (Dimas)</div>
-                  <div style={{ fontSize: 10.5, color: '#e2e8f0', marginTop: 2 }}>
-                    Konsep jarak |x| ≥ 0: tanda &lt; mengumpul di tengah, tanda &gt; memencar kiri-kanan.
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* FOOTER PAPAN TULIS */}
-      <div
-        style={{
-          position: 'relative',
-          zIndex: 10,
-          paddingTop: 6,
-          borderTop: '1px solid rgba(167, 243, 208, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          fontSize: 10.5,
-          color: 'rgba(167, 243, 208, 0.9)'
-        }}
-      >
-        <span>
-          Rentang Waktu Segmen: <strong>Menit {scene.startMin.toFixed(1)} – {scene.endMin.toFixed(1)}</strong>
-        </span>
-        <span style={{ fontFamily: 'monospace' }}>
-          Pemateri Aktif:{' '}
-          <strong style={{ color: '#fcd34d', textTransform: 'uppercase' }}>
-            {scene.presenter === 'all'
-              ? 'SELURUH TIM (4 PEMATERI)'
-              : CHARACTERS_INFO[scene.presenter]?.fullName}
-          </strong>
-        </span>
-      </div>
-    </div>
-  );
-};
-`,
-
-  // ==========================================================================
-  // 4. CLASSROOM STAGE 1920x1080 (DENGAN AUTO-SCALE 2X AGAR 100% PRESISI)
+  // 2. CLASSROOM STAGE V3.0 (MENDUKUNG MODE PRESENTER-INTRO SOLO CENTER ZOOM)
   // ==========================================================================
   'src/components/ClassroomStage.tsx': `import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';
 import { SceneItem, CHARACTERS_INFO } from '../data/scenesData';
 import { ChalkboardVisualizer } from './ChalkboardVisualizer';
 import { TeacherCharacter } from './TeacherCharacter';
+import { Scene01_Intro } from './Scene01_Intro';
 
 export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
+  const { durationInFrames, fps } = useVideoConfig();
 
-  const sceneProgress = Math.min(0.999, frame / Math.max(1, durationInFrames));
-  const activeStepIndex = Math.min(
-    scene.steps.length - 1,
-    Math.floor(sceneProgress * scene.steps.length)
-  );
-  const stepSpan = 1 / scene.steps.length;
-  const stepProgress = (sceneProgress - activeStepIndex * stepSpan) / stepSpan;
+  // Khusus Scene 01 Intro: Tampilkan langsung komponen visual animasi 3 sub-sekuens
+  if (scene.id === 'scene-01' || scene.compId === 'Scene01-Intro') {
+    return <Scene01_Intro />;
+  }
+
+  // ── Auto-Switch & Timing Langkah Berbasis useCurrentFrame ──
+  const totalSteps = scene.steps.length || 1;
+  const framesPerStep = Math.max(1, Math.floor(durationInFrames / totalSteps));
+  const activeStepIndex = Math.min(totalSteps - 1, Math.floor(frame / framesPerStep));
+  const frameInStep = frame - activeStepIndex * framesPerStep;
+  const stepProgress = frameInStep / framesPerStep;
+
+  const isPresenterIntro = scene.visualType === 'presenter-intro';
+  const presenterInfo =
+    scene.presenter !== 'all' ? CHARACTERS_INFO[scene.presenter] : CHARACTERS_INFO.rafie;
+
+  // Animasi Kamera Zoom-In Khusus Scene Intro Pemateri (Tanpa Papan Tulis, Fokus ke Pemateri di Tengah)
+  const introSpring = spring({
+    frame,
+    fps,
+    config: { damping: 20, stiffness: 60 }
+  });
+  const cameraZoom = isPresenterIntro
+    ? interpolate(frame, [0, durationInFrames], [1.08, 1.38], {
+        extrapolateRight: 'clamp'
+      })
+    : 1;
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#020617', overflow: 'hidden' }}>
-      {/* KANVAS LOGIS 960x540 DI-SCALE TEPAT 2X MENJADI 1920x1080 FULL HD */}
+      {/* KANVAS LOGIS 960x540 DI-SCALE 2X PERSIS MENJADI 1920x1080 FULL HD */}
       <div
         style={{
           width: 960,
@@ -1739,14 +1015,15 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
         {/* 1. LANGIT-LANGIT KELAS & 3 LAMPU PANEL */}
         <div
           style={{
-            height: 36,
-            backgroundColor: '#d5c7a3',
+            height: 32,
+            backgroundColor: '#d8caa8',
             borderBottom: '4px solid #8c6239',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-around',
             padding: '0 48px',
-            zIndex: 10
+            zIndex: 10,
+            flexShrink: 0
           }}
         >
           {[0, 1, 2].map((i) => (
@@ -1754,25 +1031,28 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
               key={i}
               style={{
                 width: 140,
-                height: 12,
+                height: 10,
                 backgroundColor: '#fef9c3',
-                border: '2px solid #78716c',
+                border: '1.5px solid #78716c',
                 borderRadius: 2,
-                boxShadow: '0 0 15px rgba(254,249,195,0.85)'
+                boxShadow: '0 0 14px rgba(254,249,195,0.85)'
               }}
             />
           ))}
         </div>
 
-        {/* 2. DINDING RUANG KELAS HIJAU ALAM (NATURE GREEN) */}
+        {/* 2. AREA DINDING RUANG KELAS HIJAU ALAM (NATURE GREEN) */}
         <div
           style={{
             position: 'relative',
             flex: 1,
-            background: 'linear-gradient(180deg, #7cb07a 0%, #6ea36c 100%)',
+            background: isPresenterIntro
+              ? 'radial-gradient(circle at 50% 45%, #8ec38c 0%, #6ea36c 65%, #568754 100%)'
+              : 'linear-gradient(180deg, #7cb07a 0%, #689f66 100%)',
             display: 'flex',
             alignItems: 'center',
-            padding: '10px 24px',
+            justifyContent: isPresenterIntro ? 'center' : 'flex-start',
+            padding: '8px 20px',
             overflow: 'hidden'
           }}
         >
@@ -1781,13 +1061,14 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
             style={{
               position: 'absolute',
               left: 0,
-              top: 10,
-              bottom: 36,
-              width: 48,
+              top: 8,
+              bottom: 24,
+              width: 44,
               backgroundColor: '#fef3c7',
               borderRight: '4px solid #8c6239',
               borderTop: '4px solid #8c6239',
-              borderBottom: '4px solid #8c6239'
+              borderBottom: '4px solid #8c6239',
+              zIndex: 5
             }}
           >
             <div style={{ width: '100%', height: '50%', borderBottom: '4px solid #8c6239' }} />
@@ -1802,7 +1083,8 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
               width: 180,
               pointerEvents: 'none',
               opacity: 0.22,
-              background: 'linear-gradient(115deg, rgba(254,249,195,0.85) 0%, transparent 70%)'
+              background: 'linear-gradient(115deg, rgba(254,249,195,0.85) 0%, transparent 70%)',
+              zIndex: 6
             }}
           />
 
@@ -1811,29 +1093,30 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
             style={{
               position: 'absolute',
               left: 10,
-              bottom: 6,
-              zIndex: 10,
+              bottom: 4,
+              zIndex: 12,
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              alignItems: 'center',
+              pointerEvents: 'none'
             }}
           >
             <div
               style={{
-                width: 44,
-                height: 58,
+                width: 42,
+                height: 52,
                 borderRadius: 999,
                 backgroundColor: '#047857',
-                border: '2px solid #0f172a',
+                border: '2px solid #064e3b',
                 marginBottom: -10
               }}
             />
             <div
               style={{
-                width: 36,
-                height: 36,
+                width: 34,
+                height: 32,
                 backgroundColor: '#b45309',
-                border: '2px solid #0f172a',
+                border: '2px solid #78350f',
                 borderRadius: '0 0 8px 8px'
               }}
             />
@@ -1844,297 +1127,280 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
             style={{
               position: 'absolute',
               right: 0,
-              top: 14,
+              top: 10,
               bottom: 0,
-              width: 48,
+              width: 44,
               backgroundColor: '#9a5b25',
               borderLeft: '4px solid #5c3412',
-              borderTop: '4px solid #5c3412'
+              borderTop: '4px solid #5c3412',
+              zIndex: 5
             }}
           />
 
-          {/* PAPAN TULIS KAYU COKELAT TUA (82% LEBAR PANGGUNG) */}
-          <div
-            style={{
-              position: 'relative',
-              height: '100%',
-              width: scene.presenter === 'all' ? '88%' : '81%',
-              marginLeft: 18,
-              borderRadius: 12,
-              backgroundColor: '#1e4631',
-              border: '9px solid #7c4d2b',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.45)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            <ChalkboardVisualizer
-              scene={scene}
-              activeStepIndex={activeStepIndex}
-              stepProgress={stepProgress}
-            />
-
+          {/* ============================================================== */}
+          {/* CABANG TAMPILAN 1: SCENE INTRO PEMATERI (TANPA PAPAN TULIS!)   */}
+          {/* Pemateri Berdiri Sendirian di Tengah + Kamera Zoom-In Halus    */}
+          {/* ============================================================== */}
+          {isPresenterIntro ? (
             <div
               style={{
-                height: 9,
-                backgroundColor: '#5c371c',
-                borderTop: '1px solid #9a653c',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: 32
+                justifyContent: 'flex-end',
+                zIndex: 20
               }}
             >
-              <div style={{ width: 32, height: 4, backgroundColor: '#ffffff', borderRadius: 999 }} />
-              <div style={{ width: 24, height: 5, backgroundColor: '#fde68a', borderRadius: 2 }} />
-              <div style={{ width: 40, height: 6, backgroundColor: '#1e293b', borderRadius: 2 }} />
-            </div>
-          </div>
+              {/* Lingkaran Spotlight Lembut di Belakang Pemateri */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '8%',
+                  width: 320,
+                  height: 320,
+                  borderRadius: '50%',
+                  background:
+                    'radial-gradient(circle, rgba(254,249,195,0.45) 0%, rgba(16,185,129,0.15) 55%, transparent 75%)',
+                  pointerEvents: 'none'
+                }}
+              />
 
-          {/* KARAKTER PEMATERI MENAPAK DI LANTAI (TIDAK MENGAMBANG) */}
-          {scene.presenter === 'all' ? (
-            <div
-              style={{
-                position: 'absolute',
-                left: 16,
-                right: 16,
-                top: 24,
-                bottom: 0,
-                zIndex: 20,
-                backgroundColor: 'rgba(2, 6, 23, 0.55)',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-around',
-                padding: '0 24px 4px 24px'
-              }}
-            >
-              {(['ikhsan', 'rafie', 'pras', 'dimas'] as const).map((charId) => (
-                <div
-                  key={charId}
+              {/* Banner Atas Topik Materi Pemateri (Bukan Papan Tulis) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  opacity: introSpring,
+                  transform: \`translateY(\${(1 - introSpring) * -14}px)\`,
+                  zIndex: 25
+                }}
+              >
+                <span
                   style={{
-                    height: '90%',
-                    width: 170,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end'
+                    padding: '4px 16px',
+                    borderRadius: 999,
+                    backgroundColor: 'rgba(2, 6, 23, 0.92)',
+                    border: '2px solid #fbbf24',
+                    color: '#fde68a',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: '0.08em',
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.4)'
                   }}
                 >
-                  <TeacherCharacter type={charId} isSpeaking={true} isActive={true} frame={frame} />
+                  🎬 SCENE INTRO PEMATERI • {presenterInfo.topicBadge}
+                </span>
+              </div>
+
+              {/* Kontainer Karakter di Tengah dengan Efek Kamera Zoom-In */}
+              <div
+                style={{
+                  height: '88%',
+                  width: 250,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  transform: \`scale(\${cameraZoom})\`,
+                  transformOrigin: 'center 62%',
+                  filter: 'drop-shadow(0 18px 28px rgba(0,0,0,0.4))'
+                }}
+              >
+                <TeacherCharacter
+                  type={scene.presenter === 'all' ? 'rafie' : scene.presenter}
+                  isSpeaking={true}
+                  isActive={true}
+                  frame={frame}
+                />
+              </div>
+
+              {/* Lower-Third Nameplate Keren di Depan Pemateri */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 12,
+                  backgroundColor: 'rgba(2, 6, 23, 0.94)',
+                  border: '2px solid rgba(52, 211, 153, 0.8)',
+                  borderRadius: 14,
+                  padding: '8px 24px',
+                  textAlign: 'center',
+                  boxShadow: '0 14px 30px rgba(0,0,0,0.55)',
+                  zIndex: 30,
+                  minWidth: 420
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#ffffff',
+                    letterSpacing: '0.04em'
+                  }}
+                >
+                  {presenterInfo.fullName.toUpperCase()}
                 </div>
-              ))}
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: '#6ee7b7',
+                    marginTop: 2
+                  }}
+                >
+                  {presenterInfo.role}
+                </div>
+              </div>
             </div>
           ) : (
-            <div
-              style={{
-                position: 'absolute',
-                right: 10,
-                bottom: 0,
-                height: '88%',
-                width: 175,
-                zIndex: 20,
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'center'
-              }}
-            >
-              <TeacherCharacter
-                type={scene.presenter}
-                isSpeaking={true}
-                isActive={true}
-                frame={frame}
-              />
-            </div>
+            /* ============================================================== */
+            /* CABANG TAMPILAN 2: SCENE MATERI NORMAL (DENGAN PAPAN TULIS)    */
+            /* ============================================================== */
+            <>
+              {/* PAPAN TULIS KAYU COKELAT TUA (LEBIH TINGGI & PROPORSIONAL) */}
+              <div
+                style={{
+                  position: 'relative',
+                  height: '98%',
+                  width: scene.presenter === 'all' ? '88%' : '75%',
+                  marginLeft: 24,
+                  borderRadius: 14,
+                  backgroundColor: '#1e4631',
+                  border: '9px solid #7c4d2b',
+                  boxShadow: '0 20px 45px rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  zIndex: 10
+                }}
+              >
+                <ChalkboardVisualizer
+                  scene={scene}
+                  activeStepIndex={activeStepIndex}
+                  stepProgress={stepProgress}
+                  frameInStep={frameInStep}
+                  framesPerStep={framesPerStep}
+                />
+
+                {/* Tatakan Kapur di Bawah Papan Tulis */}
+                <div
+                  style={{
+                    height: 10,
+                    backgroundColor: '#5c371c',
+                    borderTop: '1px solid #9a653c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 28,
+                    flexShrink: 0
+                  }}
+                >
+                  <div style={{ width: 32, height: 4, backgroundColor: '#ffffff', borderRadius: 999 }} />
+                  <div style={{ width: 24, height: 5, backgroundColor: '#fde68a', borderRadius: 2 }} />
+                  <div style={{ width: 38, height: 6, backgroundColor: '#1e293b', borderRadius: 2 }} />
+                </div>
+              </div>
+
+              {/* KARAKTER PEMATERI MENAPAK DI LANTAI & BERADA 100% DI DALAM LAYAR */}
+              {scene.presenter === 'all' ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 20,
+                    right: 20,
+                    top: 24,
+                    bottom: 0,
+                    zIndex: 20,
+                    backgroundColor: 'rgba(2, 6, 23, 0.55)',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-around',
+                    padding: '0 20px 4px 20px'
+                  }}
+                >
+                  {(['ikhsan', 'rafie', 'pras', 'dimas'] as const).map((charId) => (
+                    <div
+                      key={charId}
+                      style={{
+                        height: '90%',
+                        width: 165,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end'
+                      }}
+                    >
+                      <TeacherCharacter type={charId} isSpeaking={true} isActive={true} frame={frame} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 24,
+                    bottom: 0,
+                    height: '95%',
+                    width: 175,
+                    zIndex: 20,
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                    overflow: 'visible'
+                  }}
+                >
+                  <TeacherCharacter
+                    type={scene.presenter}
+                    isSpeaking={true}
+                    isActive={true}
+                    frame={frame}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
-        {/* 3. LANTAI KELAS & SUBTITLE VOICE OVER BAR */}
+        {/* 3. LANTAI KELAS NATURE GREEN (PROPORSI MENAWAN, TANPA BAR VO) */}
         <div
           style={{
+            height: 44,
+            backgroundColor: '#8ba68f',
+            borderTop: '6px solid #7c4d2b',
             position: 'relative',
-            zIndex: 30,
-            backgroundColor: 'rgba(2, 6, 23, 0.96)',
-            borderTop: '3px solid #7c4d2b',
-            padding: '8px 18px',
+            boxShadow: 'inset 0 4px 8px rgba(0,0,0,0.22)',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12
+            justifyContent: 'space-around',
+            overflow: 'hidden',
+            flexShrink: 0,
+            zIndex: 15
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-            <span
-              style={{
-                padding: '4px 10px',
-                borderRadius: 6,
-                fontSize: 11,
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                backgroundColor: '#10b981',
-                color: '#020617',
-                flexShrink: 0
-              }}
-            >
-              VO • {scene.presenter === 'all' ? 'TIM KELOMPOK' : CHARACTERS_INFO[scene.presenter]?.name}
-            </span>
-            <p
-              style={{
-                fontSize: 12.5,
-                color: '#d1fae5',
-                fontWeight: 600,
-                margin: 0,
-                lineHeight: 1.35
-              }}
-            >
-              “{scene.voScript}”
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-            {scene.steps.map((_, idx) => (
-              <span
-                key={idx}
-                style={{
-                  padding: '2px 8px',
-                  borderRadius: 4,
-                  fontSize: 10.5,
-                  fontWeight: 800,
-                  backgroundColor: idx === activeStepIndex ? '#fbbf24' : '#1e293b',
-                  color: idx === activeStepIndex ? '#020617' : '#cbd5e1'
-                }}
-              >
-                Step {idx + 1}
-              </span>
-            ))}
-          </div>
+          {/* Garis Ubin Lantai Perspektif */}
+          {[...Array(14)].map((_, i) => (
+            <div key={i} style={{ width: 1, height: '100%', backgroundColor: 'rgba(30, 70, 49, 0.22)' }} />
+          ))}
+          {/* Pantulan Sinar Matahari di Lantai */}
+          <div
+            style={{
+              position: 'absolute',
+              left: 70,
+              top: 4,
+              width: 130,
+              height: 24,
+              backgroundColor: 'rgba(254, 240, 138, 0.32)',
+              transform: 'skewX(-35deg)',
+              borderRadius: 4
+            }}
+          />
         </div>
       </div>
     </AbsoluteFill>
-  );
-};
-`,
-
-  // ==========================================================================
-  // 5. GENERIC SCENE, FULL VIDEO SERIES, & ROOT.TSX
-  // ==========================================================================
-  'src/scenes/GenericScene.tsx': `import React from 'react';
-import { SCENES_DATA } from '../data/scenesData';
-import { ClassroomStage } from '../components/ClassroomStage';
-
-export const GenericScene: React.FC<{ sceneId: string }> = ({ sceneId }) => {
-  const scene = SCENES_DATA.find((s) => s.id === sceneId) || SCENES_DATA[0];
-  return <ClassroomStage scene={scene} />;
-};
-`,
-
-  'src/scenes/FullVideo.tsx': `import React from 'react';
-import { Series } from 'remotion';
-import { SCENES_DATA, FPS } from '../data/scenesData';
-import { ClassroomStage } from '../components/ClassroomStage';
-
-export const PartSequence: React.FC<{ partNumber?: number }> = ({ partNumber }) => {
-  const scenes = partNumber
-    ? SCENES_DATA.filter((s) => s.part === partNumber)
-    : SCENES_DATA;
-
-  return (
-    <Series>
-      {scenes.map((sc) => {
-        const durationInFrames = Math.round((sc.endMin - sc.startMin) * 60 * FPS);
-        return (
-          <Series.Sequence key={sc.id} durationInFrames={durationInFrames}>
-            <ClassroomStage scene={sc} />
-          </Series.Sequence>
-        );
-      })}
-    </Series>
-  );
-};
-
-export const FullVideo: React.FC = () => <PartSequence />;
-export const Part1Linear: React.FC = () => <PartSequence partNumber={1} />;
-export const Part2Rasional: React.FC = () => <PartSequence partNumber={2} />;
-export const Part3Irasional: React.FC = () => <PartSequence partNumber={3} />;
-export const Part4Mutlak: React.FC = () => <PartSequence partNumber={4} />;
-`,
-
-  'src/Root.tsx': `import React from 'react';
-import { Composition, Folder } from 'remotion';
-import { SCENES_DATA, FPS, TOTAL_FRAMES } from './data/scenesData';
-import { ClassroomStage } from './components/ClassroomStage';
-import {
-  FullVideo,
-  Part1Linear,
-  Part2Rasional,
-  Part3Irasional,
-  Part4Mutlak
-} from './scenes/FullVideo';
-
-export const RemotionRoot: React.FC = () => {
-  return (
-    <>
-      <Folder name="1-Render-Per-Scene">
-        {SCENES_DATA.map((sc) => {
-          const durationInFrames = Math.round((sc.endMin - sc.startMin) * 60 * FPS);
-          return (
-            <Composition
-              key={sc.compId}
-              id={sc.compId}
-              component={() => <ClassroomStage scene={sc} />}
-              durationInFrames={durationInFrames}
-              fps={FPS}
-              width={1920}
-              height={1080}
-            />
-          );
-        })}
-      </Folder>
-
-      <Folder name="2-Render-Per-Part">
-        <Composition
-          id="Part1-Linear-Rafie"
-          component={Part1Linear}
-          durationInFrames={16 * 60 * FPS}
-          fps={FPS}
-          width={1920}
-          height={1080}
-        />
-        <Composition
-          id="Part2-Rasional-Ikhsan"
-          component={Part2Rasional}
-          durationInFrames={15 * 60 * FPS}
-          fps={FPS}
-          width={1920}
-          height={1080}
-        />
-        <Composition
-          id="Part3-Irasional-Pras"
-          component={Part3Irasional}
-          durationInFrames={14 * 60 * FPS}
-          fps={FPS}
-          width={1920}
-          height={1080}
-        />
-        <Composition
-          id="Part4-Mutlak-Dimas-Closing"
-          component={Part4Mutlak}
-          durationInFrames={15 * 60 * FPS}
-          fps={FPS}
-          width={1920}
-          height={1080}
-        />
-      </Folder>
-
-      <Composition
-        id="FullVideo"
-        component={FullVideo}
-        durationInFrames={TOTAL_FRAMES}
-        fps={FPS}
-        width={1920}
-        height={1080}
-      />
-    </>
   );
 };
 `
@@ -2146,20 +1412,18 @@ function applyExactRebuild() {
     const fullPath = path.join(ROOT_DIR, relPath);
     fs.mkdirSync(path.dirname(fullPath), { recursive: true });
     fs.writeFileSync(fullPath, content, 'utf8');
-    logs.push(`✅ Updated: ${relPath}`);
+    logs.push(`✅ Updated V3.0: ${relPath}`);
   }
-  return logs.join('\n');
+  return logs.join('\\n');
 }
 
-// Mode 1: Direct CLI execution (node mcp-pertidaksamaan-server.mjs --apply)
 if (process.argv.includes('--apply')) {
-  console.log('🚀 Menjalankan 1:1 Exact Visual Rebuild untuk Remotion Pertidaksamaan...');
+  console.log('🚀 Menjalankan Update V3.0 (4 Scene Intro Pemateri Zoom Tengah Tanpa Papan Tulis)...');
   console.log(applyExactRebuild());
-  console.log('🎉 Selesai! Silakan cek localhost:3000 — tampilan sekarang 100% presisi!');
+  console.log('🎉 Selesai! Cek localhost:3000 untuk melihat Scene02A-IntroRafie, Scene06A-IntroIkhsan, Scene08A-IntroPras, dan Scene10A-IntroDimas!');
   process.exit(0);
 }
 
-// Mode 2: Standard MCP Server (JSON-RPC 2.0 over stdio) untuk AI Antigravity
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: false });
 
 rl.on('line', (line) => {
@@ -2174,7 +1438,7 @@ rl.on('line', (line) => {
           result: {
             protocolVersion: '2024-11-05',
             capabilities: { tools: {} },
-            serverInfo: { name: 'mcp-pertidaksamaan-remotion', version: '2.0.0' }
+            serverInfo: { name: 'mcp-pertidaksamaan-remotion', version: '3.0.0' }
           }
         }) + '\\n'
       );
@@ -2188,7 +1452,7 @@ rl.on('line', (line) => {
               {
                 name: 'apply_exact_remotion_visuals',
                 description:
-                  'Menulis ulang seluruh komponen Remotion Pertidaksamaan 60 Menit dengan resolusi 1920x1080 (scale 2x), papan tulis 2 kolom, dan 4 karakter menapak di lantai secara presisi 1:1.',
+                  'Update V3.0: Menambahkan 4 Scene Intro Pemateri (Rafie, Ikhsan, Pras, Dimas) di tengah layar dengan efek kamera Zoom-In tanpa papan tulis.',
                 inputSchema: { type: 'object', properties: {} }
               }
             ]

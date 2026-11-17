@@ -7,6 +7,7 @@ export interface CharacterProfile {
   name: string;
   fullName: string;
   role: string;
+  topicBadge: string;
   desc: string;
 }
 
@@ -16,13 +17,15 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'IKHSAN',
     fullName: 'Ikhsan',
     role: 'Pemateri 2 • Pertidaksamaan Rasional (Pecahan)',
+    topicBadge: 'CABANG 2: PERTIDAKSAMAAN RASIONAL (PECAHAN ALJABAR)',
     desc: 'Rambut messy bowl cut berponi, kacamata bulat, kemeja batik di balik jas biru muda polos, memegang pointer.'
   },
   rafie: {
     id: 'rafie',
     name: 'RAFIE',
     fullName: 'Rafie Armansyah',
-    role: 'Moderator & Pemateri 1 • Opening, PLSV, PLDV & Closing',
+    role: 'Moderator & Pemateri 1 • Pertidaksamaan Linear (PLSV & PLDV)',
+    topicBadge: 'CABANG 1: PERTIDAKSAMAAN LINEAR (1 & 2 VARIABEL)',
     desc: 'Rambut hitam rapi belah tengah, berkacamata frame tipis, kemeja putih di balik jas biru muda polos, memegang tablet.'
   },
   pras: {
@@ -30,6 +33,7 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'PRAS',
     fullName: 'Pras',
     role: 'Pemateri 3 • Pertidaksamaan Irasional (Bentuk Akar)',
+    topicBadge: 'CABANG 3: PERTIDAKSAMAAN IRASIONAL (BENTUK AKAR)',
     desc: 'Rambut sedikit bergelombang tanpa kacamata, kaos polo gelap di balik jas biru muda polos, gestur tangan terbuka.'
   },
   dimas: {
@@ -37,6 +41,7 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     name: 'DIMAS',
     fullName: 'Dimas',
     role: 'Pemateri 4 • Pertidaksamaan Nilai Mutlak',
+    topicBadge: 'CABANG 4: PERTIDAKSAMAAN NILAI MUTLAK |f(x)|',
     desc: 'Postur tegap/berisi, rambut sangat pendek (buzz cut), kaos hitam di balik jas biru muda polos.'
   }
 };
@@ -60,7 +65,15 @@ export interface SceneItem {
   title: string;
   boardTitle: string;
   boardSubtitle: string;
-  visualType: 'intro-school' | 'number-line' | 'cartesian-pldv' | 'sign-table' | 'mutlak-table' | 'concept-box' | 'summary-master';
+  visualType:
+    | 'presenter-intro'
+    | 'intro-school'
+    | 'number-line'
+    | 'cartesian-pldv'
+    | 'sign-table'
+    | 'mutlak-table'
+    | 'concept-box'
+    | 'summary-master';
   voScript: string;
   numberLineConfig?: {
     points: { val: number; filled: boolean; label: string }[];
@@ -77,6 +90,7 @@ export interface SceneItem {
 }
 
 export const SCENES_DATA: SceneItem[] = [
+  // 1. SCENE 01: INTRO SEKOLAH & 4 KARAKTER
   {
     id: 'scene-01',
     compId: 'Scene01-Intro',
@@ -112,20 +126,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 2. SCENE 02A: INTRO SOLO RAFIE (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-02a-intro-rafie',
+    compId: 'Scene02A-IntroRafie',
+    code: 'Scene 02A (Intro Rafie)',
+    part: 1,
+    partName: 'Part 1: Intro & Linear',
+    startMin: 2,
+    endMin: 3,
+    presenter: 'rafie',
+    title: 'Scene Intro Pemateri 1: Rafie Armansyah (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 1: RAFIE ARMANSYAH',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Linear Satu & Dua Variabel (PLSV & PLDV)',
+    visualType: 'presenter-intro',
+    voScript: 'Halo semuanya! Selamat datang di video pembelajaran matematika kelompok kami. Kenalkan, gw Rafie Armansyah! Di bagian pertama ini, gw bakal memandu kalian membedah tuntas Pertidaksamaan Linear Satu Variabel dan Dua Variabel beserta 5 contoh soalnya. Yuk langsung kita mulai!',
+    steps: [
+      {
+        label: 'Perkenalan Moderator & Pemateri 1: Rafie Armansyah',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Linear Satu Variabel (PLSV) & Dua Variabel (PLDV)',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Rafie di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Aturan Kali/Bagi Negatif & Uji Titik (0,0)',
+        badge: 'Highlight Topik',
+        eq: 'Hukum Fundamental (<, >, ≤, ≥) • Garis Bilangan 1D • Grafik Kartesius 2D',
+        desc: 'Membahas konsep dasar perbandingan ukuran, isolasi variabel, hingga arsiran Daerah Himpunan Penyelesaian (DHP).'
+      }
+    ]
+  },
+
+  // 3. SCENE 02: HUKUM FUNDAMENTAL (RAFIE + PAPAN TULIS)
   {
     id: 'scene-02',
     compId: 'Scene02-HukumFundamental',
     code: 'Scene 02',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 2,
-    endMin: 5,
+    startMin: 3,
+    endMin: 5.5,
     presenter: 'rafie',
-    title: 'Opening Moderator & Hukum Fundamental Pertidaksamaan',
+    title: 'Hukum Fundamental Pertidaksamaan',
     boardTitle: 'HUKUM FUNDAMENTAL PERTIDAKSAMAAN (<, >, ≤, ≥)',
     boardSubtitle: 'Pemateri: Rafie Armansyah • Aturan Mutlak Penjumlahan vs Perkalian/Pembagian Negatif',
     visualType: 'number-line',
-    voScript: 'Halo semuanya! Selamat datang di video pembelajaran matematika kelompok kami. Kenalkan, gw Rafie Armansyah. Secara sederhana, pertidaksamaan itu adalah kalimat matematika yang nunjukin perbandingan ukuran. Ingat aturan paling kritis: kalau dikali atau dibagi bilangan negatif, tanda wajib berbalik arah!',
+    voScript: 'Secara sederhana, pertidaksamaan itu adalah kalimat matematika yang nunjukin perbandingan ukuran. Ingat aturan paling kritis: kalau dikali atau dibagi bilangan negatif, tanda wajib berbalik arah!',
     numberLineConfig: {
       points: [{ val: -3, filled: false, label: '−3' }],
       shades: [{ from: -3, to: 5.5, label: 'Solusi: x > −3' }],
@@ -156,13 +203,15 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 4. SCENE 03: KONSEP PLSV
   {
     id: 'scene-03',
     compId: 'Scene03-KonsepPLSV',
     code: 'Scene 03',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 5,
+    startMin: 5.5,
     endMin: 8,
     presenter: 'rafie',
     title: 'Konsep Pertidaksamaan Linear Satu Variabel (PLSV)',
@@ -200,6 +249,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 5. SCENE 04: KONSEP PLDV
   {
     id: 'scene-04',
     compId: 'Scene04-KonsepPLDV',
@@ -240,6 +291,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 6. SCENE 05A: SOAL 1 & 2 PLSV
   {
     id: 'scene-05a',
     compId: 'Scene05A-SoalPLSV',
@@ -284,6 +337,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 7. SCENE 05B: SOAL 3, 4 & 5 PLDV
   {
     id: 'scene-05b',
     compId: 'Scene05B-SoalPLDV',
@@ -324,20 +379,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 8. SCENE 06A: INTRO SOLO IKHSAN (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-06a-intro-ikhsan',
+    compId: 'Scene06A-IntroIkhsan',
+    code: 'Scene 06A (Intro Ikhsan)',
+    part: 2,
+    partName: 'Part 2: Rasional (Ikhsan)',
+    startMin: 16,
+    endMin: 17,
+    presenter: 'ikhsan',
+    title: 'Scene Intro Pemateri 2: Ikhsan (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 2: IKHSAN',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Rasional (Bentuk Pecahan Aljabar)',
+    visualType: 'presenter-intro',
+    voScript: 'Siap, thank you, Rafie! Halo teman-teman semuanya, kenalin gw Ikhsan! Di segmen kedua ini, gw bakal ngajak kalian menyelami materi Pertidaksamaan Rasional atau bentuk pecahan aljabar. Ingat satu aturan emasnya: penyebut nggak boleh sama dengan nol! Yuk kita bahas ke papan tulis!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 2: Ikhsan',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Rasional: f(x) / g(x) > 0  dengan  g(x) ≠ 0',
+        desc: 'Kamera melakukan zoom-in ke arah Ikhsan di tengah ruang kelas sebelum menampilkan papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Titik Kritis, Tabel Uji Tanda & 5 Contoh Soal',
+        badge: 'Highlight Topik',
+        eq: 'Pembuat Nol Pembilang vs Penyebut • Larangan Kali Silang • Faktor Tercoret',
+        desc: 'Membedah tuntas cara menentukan tanda interval pada garis bilangan dan menghindari 4 kesalahan fatal.'
+      }
+    ]
+  },
+
+  // 9. SCENE 06: KONSEP RASIONAL (IKHSAN + PAPAN TULIS)
   {
     id: 'scene-06',
     compId: 'Scene06-KonsepRasional',
     code: 'Scene 06',
     part: 2,
     partName: 'Part 2: Rasional (Ikhsan)',
-    startMin: 16,
-    endMin: 20,
+    startMin: 17,
+    endMin: 20.5,
     presenter: 'ikhsan',
     title: 'Pengertian Pertidaksamaan Rasional, Titik Kritis & Tabel Uji Tanda',
     boardTitle: 'PERTIDAKSAMAAN RASIONAL (PECAHAN ALJABAR)',
     boardSubtitle: 'Pemateri: Ikhsan • Bentuk Umum f(x)/g(x) > 0 dengan Syarat Mutlak g(x) ≠ 0',
     visualType: 'sign-table',
-    voScript: 'Siap, thank you, Rafie! Oke teman-teman, sekarang kita masuk ke jenis kedua yaitu Pertidaksamaan Rasional. Beda sama yang linear, di sini bentuk matematikanya berupa pecahan f(x)/g(x). Aturan paling penting: penyebutnya nggak boleh sama dengan nol!',
+    voScript: 'Oke teman-teman, beda sama yang linear tadi, di Pertidaksamaan Rasional ini bentuk matematikanya berupa pecahan f(x)/g(x). Kita harus mencari titik kritis dari pembilang dan penyebut, lalu melakukan uji tanda pada garis bilangan.',
     steps: [
       {
         label: 'Pengertian & Syarat Penyebut Pertidaksamaan Rasional',
@@ -359,13 +447,15 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 10. SCENE 07A: SOAL RASIONAL 1, 2 & 3
   {
     id: 'scene-07a',
     compId: 'Scene07A-SoalRasional123',
     code: 'Scene 07A',
     part: 2,
     partName: 'Part 2: Rasional (Ikhsan)',
-    startMin: 20,
+    startMin: 20.5,
     endMin: 25.5,
     presenter: 'ikhsan',
     title: 'Pembahasan Contoh Soal 1, 2 & 3 Pertidaksamaan Rasional',
@@ -410,6 +500,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 11. SCENE 07B: SOAL RASIONAL 4 & 5
   {
     id: 'scene-07b',
     compId: 'Scene07B-SoalRasional45',
@@ -463,20 +555,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 12. SCENE 08A: INTRO SOLO PRAS (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-08a-intro-pras',
+    compId: 'Scene08A-IntroPras',
+    code: 'Scene 08A (Intro Pras)',
+    part: 3,
+    partName: 'Part 3: Irasional (Pras)',
+    startMin: 31,
+    endMin: 32,
+    presenter: 'pras',
+    title: 'Scene Intro Pemateri 3: Pras (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 3: PRAS',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Irasional (Bentuk Akar)',
+    visualType: 'presenter-intro',
+    voScript: 'Oke, makasih Ikhsan! Halo semuanya, kenalin gw Pras! Sekarang kita masuk ke cabang ketiga yaitu Pertidaksamaan Irasional atau bentuk akar. Kunci utama nyelesaiin soal ini ada dua: wajib cek Syarat Numerus di dalam akar harus lebih besar atau sama dengan nol, baru kita kuadratin kedua ruas! Yuk simak pembahasannya!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 3: Pras',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Irasional (Bentuk Akar): √f(x) < c  &  √f(x) ≤ √g(x)',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Pras di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Syarat Numerus f(x) ≥ 0 & Irisan Himpunan Penyelesaian',
+        badge: 'Highlight Topik',
+        eq: 'Syarat Akar: f(x) ≥ 0  ∩  Kuadrat Ruas  =  Himpunan Penyelesaian (HP)',
+        desc: 'Membahas cara mencari irisan solusi pada garis bilangan untuk 1 akar maupun 2 akar.'
+      }
+    ]
+  },
+
+  // 13. SCENE 08: KONSEP IRASIONAL (PRAS + PAPAN TULIS)
   {
     id: 'scene-08',
     compId: 'Scene08-KonsepIrasional',
     code: 'Scene 08',
     part: 3,
     partName: 'Part 3: Irasional (Pras)',
-    startMin: 31,
+    startMin: 32,
     endMin: 36,
     presenter: 'pras',
     title: 'Pengertian Pertidaksamaan Irasional & Syarat Utama Numerus',
     boardTitle: 'PERTIDAKSAMAAN IRASIONAL (BENTUK AKAR)',
     boardSubtitle: 'Pemateri: Pras • Syarat Mutlak Numerus f(x) ≥ 0 & Hasil Akar √f(x) ≥ 0',
     visualType: 'concept-box',
-    voScript: 'Oke, makasih Ikhsan. Halo semuanya, gw Pras! Sekarang kita bahas Pertidaksamaan Irasional atau bentuk akar. Kunci utama buat nyelesaiin soal ini ada dua syarat: kuadratin kedua ruas, dan syarat numerus yaitu nilai di dalam akar wajib lebih besar atau sama dengan nol!',
+    voScript: 'Di papan tulis kita bisa lihat, pertidaksamaan irasional memuat variabel di dalam tanda akar. Jangan pernah langsung mengkuadratkan kedua ruas sebelum kalian menuliskan syarat numerus f(x) ≥ 0!',
     steps: [
       {
         label: 'Pengertian Pertidaksamaan Irasional (Bentuk Akar)',
@@ -498,6 +623,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 14. SCENE 09A: SOAL IRASIONAL 1 & 2
   {
     id: 'scene-09a',
     compId: 'Scene09A-SoalIrasional12',
@@ -546,6 +673,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 15. SCENE 09B: SOAL IRASIONAL 3, 4 & 5
   {
     id: 'scene-09b',
     compId: 'Scene09B-SoalIrasional345',
@@ -593,20 +722,53 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 16. SCENE 10A: INTRO SOLO DIMAS (TENGAH & ZOOM TANPA PAPAN TULIS)
+  {
+    id: 'scene-10a-intro-dimas',
+    compId: 'Scene10A-IntroDimas',
+    code: 'Scene 10A (Intro Dimas)',
+    part: 4,
+    partName: 'Part 4: Mutlak & Closing',
+    startMin: 45,
+    endMin: 46,
+    presenter: 'dimas',
+    title: 'Scene Intro Pemateri 4: Dimas (Zoom Center Tanpa Papan Tulis)',
+    boardTitle: 'PEMATERI 4: DIMAS',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Nilai Mutlak |f(x)|',
+    visualType: 'presenter-intro',
+    voScript: 'Mantap, Pras! Halo semuanya, kenalin gw Dimas! Di bagian keempat ini kita bakal mengupas tuntas Pertidaksamaan Nilai Mutlak. Konsep dasarnya, nilai mutlak itu mengukur jarak suatu bilangan dari titik nol, jadi nilainya nggak mungkin negatif! Yuk langsung kita lihat rumusnya di papan tulis!',
+    steps: [
+      {
+        label: 'Perkenalan Pemateri 4: Dimas',
+        badge: 'Solo Zoom-In',
+        eq: 'Pertidaksamaan Nilai Mutlak: |f(x)| < a   &   |f(x)| ≥ a',
+        desc: 'Kamera melakukan zoom-in fokus ke arah Dimas di tengah kelas sebelum masuk ke papan tulis.'
+      },
+      {
+        label: 'Fokus Materi: Konsep Jarak Fisik, Rumus Sifat & Evaluasi Kesalahan Umum',
+        badge: 'Highlight Topik',
+        eq: 'Tanda < (Mengumpul di Tengah)  vs  Tanda > (Memencar Kiri & Kanan)',
+        desc: 'Membedah 5 contoh soal nilai mutlak termasuk jebakan konstanta negatif |x| < −5.'
+      }
+    ]
+  },
+
+  // 17. SCENE 10: KONSEP NILAI MUTLAK (DIMAS + PAPAN TULIS)
   {
     id: 'scene-10',
     compId: 'Scene10-KonsepMutlak',
     code: 'Scene 10',
     part: 4,
     partName: 'Part 4: Mutlak & Closing',
-    startMin: 45,
+    startMin: 46,
     endMin: 49.5,
     presenter: 'dimas',
     title: 'Pengertian Pertidaksamaan Nilai Mutlak, Konsep Jarak & Tabel Sifat',
     boardTitle: 'PERTIDAKSAMAAN NILAI MUTLAK |f(x)|',
     boardSubtitle: 'Pemateri: Dimas • Prinsip Jarak dari Titik Nol (|x| ≥ 0) & Karakteristik Tanda',
     visualType: 'mutlak-table',
-    voScript: 'Mantap, Pras! Halo semuanya, gw Dimas. Konsep dasarnya, nilai mutlak itu nunjukin jarak suatu angka dari titik nol di garis bilangan. Karena ngomongin jarak fisik, nilainya pasti selalu positif atau minimal nol! Kalau tandanya kurang dari (<), daerahnya ngumpul di tengah. Kalau lebih dari (>), daerahnya mencar ke kiri dan kanan.',
+    voScript: 'Perhatikan tabel di papan tulis: kalau tandanya kurang dari (<), daerah penyelesaiannya ngumpul di tengah-tengah. Tapi kalau tandanya lebih dari (>), daerah penyelesaiannya memencar ke arah kiri dan kanan.',
     steps: [
       {
         label: 'Pengertian & Konsep Dasar Jarak Fisik dari Titik Nol',
@@ -628,6 +790,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 18. SCENE 11A: SOAL MUTLAK 1 & 2
   {
     id: 'scene-11a',
     compId: 'Scene11A-SoalMutlak12',
@@ -676,6 +840,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 19. SCENE 11B: SOAL MUTLAK 3, 4 & 5
   {
     id: 'scene-11b',
     compId: 'Scene11B-SoalMutlak345',
@@ -727,6 +893,8 @@ export const SCENES_DATA: SceneItem[] = [
       }
     ]
   },
+
+  // 20. SCENE 12: CLOSING SUMMARY
   {
     id: 'scene-12',
     compId: 'Scene12-ClosingSummary',

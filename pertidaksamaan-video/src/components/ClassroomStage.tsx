@@ -1,13 +1,13 @@
 import React from 'react';
-import { AbsoluteFill, useCurrentFrame, useVideoConfig } from 'remotion';
-import { SceneItem } from '../data/scenesData';
+import { AbsoluteFill, useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';
+import { SceneItem, CHARACTERS_INFO } from '../data/scenesData';
 import { ChalkboardVisualizer } from './ChalkboardVisualizer';
 import { TeacherCharacter } from './TeacherCharacter';
 import { Scene01_Intro } from './Scene01_Intro';
 
 export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
+  const { durationInFrames, fps } = useVideoConfig();
 
   // Khusus Scene 01 Intro: Tampilkan langsung komponen visual animasi 3 sub-sekuens
   if (scene.id === 'scene-01' || scene.compId === 'Scene01-Intro') {
@@ -20,6 +20,22 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   const activeStepIndex = Math.min(totalSteps - 1, Math.floor(frame / framesPerStep));
   const frameInStep = frame - activeStepIndex * framesPerStep;
   const stepProgress = frameInStep / framesPerStep;
+
+  const isPresenterIntro = scene.visualType === 'presenter-intro';
+  const presenterInfo =
+    scene.presenter !== 'all' ? CHARACTERS_INFO[scene.presenter] : CHARACTERS_INFO.rafie;
+
+  // Animasi Kamera Zoom-In Khusus Scene Intro Pemateri (Tanpa Papan Tulis, Fokus ke Pemateri di Tengah)
+  const introSpring = spring({
+    frame,
+    fps,
+    config: { damping: 20, stiffness: 60 }
+  });
+  const cameraZoom = isPresenterIntro
+    ? interpolate(frame, [0, durationInFrames], [1.08, 1.38], {
+        extrapolateRight: 'clamp'
+      })
+    : 1;
 
   return (
     <AbsoluteFill style={{ backgroundColor: '#020617', overflow: 'hidden' }}>
@@ -34,7 +50,7 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          backgroundColor: '#7cb07a',
+          backgroundColor: '#84b582',
           fontFamily: 'Inter, system-ui, sans-serif',
           overflow: 'hidden'
         }}
@@ -68,19 +84,22 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
           ))}
         </div>
 
-        {/* 2. AREA DINDING NATURE GREEN & PAPAN TULIS BESAR (DIPERLUAS PENUH) */}
+        {/* 2. AREA DINDING RUANG KELAS HIJAU ALAM (NATURE GREEN) */}
         <div
           style={{
             position: 'relative',
             flex: 1,
-            background: 'linear-gradient(180deg, #7cb07a 0%, #689f66 100%)',
+            background: isPresenterIntro
+              ? 'radial-gradient(circle at 50% 45%, #8ec38c 0%, #6ea36c 65%, #568754 100%)'
+              : 'linear-gradient(180deg, #7cb07a 0%, #689f66 100%)',
             display: 'flex',
             alignItems: 'center',
+            justifyContent: isPresenterIntro ? 'center' : 'flex-start',
             padding: '8px 20px',
             overflow: 'hidden'
           }}
         >
-          {/* Jendela Kiri & Sinar Matahari Pagi */}
+          {/* Jendela Kiri & Cahaya Matahari Pagi */}
           <div
             style={{
               position: 'absolute',
@@ -112,7 +131,7 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
             }}
           />
 
-          {/* Tanaman Monstera Pot Terakota di Sudut Kiri Bawah */}
+          {/* Tanaman Hias di Sudut Kiri Bawah */}
           <div
             style={{
               position: 'absolute',
@@ -161,105 +180,232 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
             }}
           />
 
-          {/* PAPAN TULIS KAYU COKELAT TUA (LEBIH TINGGI & PROPORSIONAL KARENA BAR VO DIHAPUS) */}
-          <div
-            style={{
-              position: 'relative',
-              height: '98%',
-              width: scene.presenter === 'all' ? '88%' : '75%',
-              marginLeft: 24,
-              borderRadius: 14,
-              backgroundColor: '#1e4631',
-              border: '9px solid #7c4d2b',
-              boxShadow: '0 20px 45px rgba(0,0,0,0.5)',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              zIndex: 10
-            }}
-          >
-            <ChalkboardVisualizer
-              scene={scene}
-              activeStepIndex={activeStepIndex}
-              stepProgress={stepProgress}
-              frameInStep={frameInStep}
-              framesPerStep={framesPerStep}
-            />
-
-            {/* Tatakan Kapur di Bawah Papan Tulis */}
+          {/* ============================================================== */}
+          {/* CABANG TAMPILAN 1: SCENE INTRO PEMATERI (TANPA PAPAN TULIS!)   */}
+          {/* Pemateri Berdiri Sendirian di Tengah + Kamera Zoom-In Halus    */}
+          {/* ============================================================== */}
+          {isPresenterIntro ? (
             <div
               style={{
-                height: 10,
-                backgroundColor: '#5c371c',
-                borderTop: '1px solid #9a653c',
+                position: 'relative',
+                width: '100%',
+                height: '100%',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: 28,
-                flexShrink: 0
+                justifyContent: 'flex-end',
+                zIndex: 20
               }}
             >
-              <div style={{ width: 32, height: 4, backgroundColor: '#ffffff', borderRadius: 999 }} />
-              <div style={{ width: 24, height: 5, backgroundColor: '#fde68a', borderRadius: 2 }} />
-              <div style={{ width: 38, height: 6, backgroundColor: '#1e293b', borderRadius: 2 }} />
-            </div>
-          </div>
+              {/* Lingkaran Spotlight Lembut di Belakang Pemateri */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '8%',
+                  width: 320,
+                  height: 320,
+                  borderRadius: '50%',
+                  background:
+                    'radial-gradient(circle, rgba(254,249,195,0.45) 0%, rgba(16,185,129,0.15) 55%, transparent 75%)',
+                  pointerEvents: 'none'
+                }}
+              />
 
-          {/* KARAKTER PEMATERI MENAPAK DI LANTAI & BERADA 100% DI DALAM LAYAR (TIDAK TERPOTONG) */}
-          {scene.presenter === 'all' ? (
-            <div
-              style={{
-                position: 'absolute',
-                left: 20,
-                right: 20,
-                top: 24,
-                bottom: 0,
-                zIndex: 20,
-                backgroundColor: 'rgba(2, 6, 23, 0.55)',
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-around',
-                padding: '0 20px 4px 20px'
-              }}
-            >
-              {(['ikhsan', 'rafie', 'pras', 'dimas'] as const).map((charId) => (
-                <div
-                  key={charId}
+              {/* Banner Atas Topik Materi Pemateri (Bukan Papan Tulis) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: 4,
+                  opacity: introSpring,
+                  transform: `translateY(${(1 - introSpring) * -14}px)`,
+                  zIndex: 25
+                }}
+              >
+                <span
                   style={{
-                    height: '90%',
-                    width: 165,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'flex-end'
+                    padding: '4px 16px',
+                    borderRadius: 999,
+                    backgroundColor: 'rgba(2, 6, 23, 0.92)',
+                    border: '2px solid #fbbf24',
+                    color: '#fde68a',
+                    fontSize: 11,
+                    fontWeight: 900,
+                    letterSpacing: '0.08em',
+                    boxShadow: '0 6px 16px rgba(0,0,0,0.4)'
                   }}
                 >
-                  <TeacherCharacter type={charId} isSpeaking={true} isActive={true} frame={frame} />
+                  🎬 SCENE INTRO PEMATERI • {presenterInfo.topicBadge}
+                </span>
+              </div>
+
+              {/* Kontainer Karakter di Tengah dengan Efek Kamera Zoom-In */}
+              <div
+                style={{
+                  height: '88%',
+                  width: 250,
+                  display: 'flex',
+                  alignItems: 'flex-end',
+                  justifyContent: 'center',
+                  transform: `scale(${cameraZoom})`,
+                  transformOrigin: 'center 62%',
+                  filter: 'drop-shadow(0 18px 28px rgba(0,0,0,0.4))'
+                }}
+              >
+                <TeacherCharacter
+                  type={scene.presenter === 'all' ? 'rafie' : scene.presenter}
+                  isSpeaking={true}
+                  isActive={true}
+                  frame={frame}
+                />
+              </div>
+
+              {/* Lower-Third Nameplate Keren di Depan Pemateri */}
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: 12,
+                  backgroundColor: 'rgba(2, 6, 23, 0.94)',
+                  border: '2px solid rgba(52, 211, 153, 0.8)',
+                  borderRadius: 14,
+                  padding: '8px 24px',
+                  textAlign: 'center',
+                  boxShadow: '0 14px 30px rgba(0,0,0,0.55)',
+                  zIndex: 30,
+                  minWidth: 420
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 900,
+                    color: '#ffffff',
+                    letterSpacing: '0.04em'
+                  }}
+                >
+                  {presenterInfo.fullName.toUpperCase()}
                 </div>
-              ))}
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: '#6ee7b7',
+                    marginTop: 2
+                  }}
+                >
+                  {presenterInfo.role}
+                </div>
+              </div>
             </div>
           ) : (
-            <div
-              style={{
-                position: 'absolute',
-                right: 24, // Diberi jarak 24px agar karakter tidak terpotong tepi layar
-                bottom: 0,
-                height: '95%',
-                width: 175,
-                zIndex: 20,
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'center',
-                overflow: 'visible'
-              }}
-            >
-              <TeacherCharacter
-                type={scene.presenter}
-                isSpeaking={true}
-                isActive={true}
-                frame={frame}
-              />
-            </div>
+            /* ============================================================== */
+            /* CABANG TAMPILAN 2: SCENE MATERI NORMAL (DENGAN PAPAN TULIS)    */
+            /* ============================================================== */
+            <>
+              {/* PAPAN TULIS KAYU COKELAT TUA (LEBIH TINGGI & PROPORSIONAL) */}
+              <div
+                style={{
+                  position: 'relative',
+                  height: '98%',
+                  width: scene.presenter === 'all' ? '88%' : '75%',
+                  marginLeft: 24,
+                  borderRadius: 14,
+                  backgroundColor: '#1e4631',
+                  border: '9px solid #7c4d2b',
+                  boxShadow: '0 20px 45px rgba(0,0,0,0.5)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  overflow: 'hidden',
+                  zIndex: 10
+                }}
+              >
+                <ChalkboardVisualizer
+                  scene={scene}
+                  activeStepIndex={activeStepIndex}
+                  stepProgress={stepProgress}
+                  frameInStep={frameInStep}
+                  framesPerStep={framesPerStep}
+                />
+
+                {/* Tatakan Kapur di Bawah Papan Tulis */}
+                <div
+                  style={{
+                    height: 10,
+                    backgroundColor: '#5c371c',
+                    borderTop: '1px solid #9a653c',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 28,
+                    flexShrink: 0
+                  }}
+                >
+                  <div style={{ width: 32, height: 4, backgroundColor: '#ffffff', borderRadius: 999 }} />
+                  <div style={{ width: 24, height: 5, backgroundColor: '#fde68a', borderRadius: 2 }} />
+                  <div style={{ width: 38, height: 6, backgroundColor: '#1e293b', borderRadius: 2 }} />
+                </div>
+              </div>
+
+              {/* KARAKTER PEMATERI MENAPAK DI LANTAI & BERADA 100% DI DALAM LAYAR */}
+              {scene.presenter === 'all' ? (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 20,
+                    right: 20,
+                    top: 24,
+                    bottom: 0,
+                    zIndex: 20,
+                    backgroundColor: 'rgba(2, 6, 23, 0.55)',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'space-around',
+                    padding: '0 20px 4px 20px'
+                  }}
+                >
+                  {(['ikhsan', 'rafie', 'pras', 'dimas'] as const).map((charId) => (
+                    <div
+                      key={charId}
+                      style={{
+                        height: '90%',
+                        width: 165,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end'
+                      }}
+                    >
+                      <TeacherCharacter type={charId} isSpeaking={true} isActive={true} frame={frame} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 24,
+                    bottom: 0,
+                    height: '95%',
+                    width: 175,
+                    zIndex: 20,
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    justifyContent: 'center',
+                    overflow: 'visible'
+                  }}
+                >
+                  <TeacherCharacter
+                    type={scene.presenter}
+                    isSpeaking={true}
+                    isActive={true}
+                    frame={frame}
+                  />
+                </div>
+              )}
+            </>
           )}
         </div>
 
