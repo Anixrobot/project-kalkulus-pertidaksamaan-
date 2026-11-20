@@ -1,5 +1,6 @@
 {
   "typescript.tsdk": "pertidaksamaan-video/node_modules/typescript/lib",
-  "tailwindCSS.lint.suggestCanonicalClasses": "ignore"
+  "tailwindCSS.lint.suggestCanonicalClasses": "ignore",
+  "liveServer.settings.port": 5501
 }
 
