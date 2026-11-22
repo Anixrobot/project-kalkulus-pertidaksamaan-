@@ -24,7 +24,7 @@ export const CHARACTERS_INFO: Record<string, CharacterProfile> = {
     id: 'rafie',
     name: 'RAFIE',
     fullName: 'Rafie Armansyah',
-    role: 'Moderator & Pemateri 1 • Pertidaksamaan Linear (PLSV & PLDV)',
+    role: 'Moderator & Pemateri 1 • Pertidaksamaan Linear (PtLSV & PtLDV)',
     topicBadge: 'CABANG 1: PERTIDAKSAMAAN LINEAR (1 & 2 VARIABEL)',
     desc: 'Rambut hitam rapi belah tengah, berkacamata frame tipis, kemeja putih di balik jas biru muda polos, memegang tablet.'
   },
@@ -69,7 +69,7 @@ export interface SceneItem {
     | 'presenter-intro'
     | 'intro-school'
     | 'number-line'
-    | 'cartesian-pldv'
+    | 'cartesian-ptldv'
     | 'sign-table'
     | 'mutlak-table'
     | 'concept-box'
@@ -82,7 +82,7 @@ export interface SceneItem {
     caption: string;
   };
   cartesianConfig?: {
-    mode: 'case1' | 'case2';
+    mode: 'case1' | 'case2' | 'case3';
     equation: string;
     testText: string;
   };
@@ -121,7 +121,7 @@ export const SCENES_DATA: SceneItem[] = [
       {
         label: 'Peta Konsep 60 Menit Pembelajaran & 20 Contoh Soal',
         badge: '01:20 - 02:00',
-        eq: 'PLSV & PLDV ➔ Pecahan Rasional ➔ Bentuk Akar Irasional ➔ Nilai Mutlak',
+        eq: 'PtLSV & PtLDV ➔ Pecahan Rasional ➔ Bentuk Akar Irasional ➔ Nilai Mutlak',
         desc: 'Setiap pemateri mengupas konsep dasar, syarat mutlak, visualisasi garis bilangan/grafik, serta 5 contoh soal bertingkat.'
       }
     ]
@@ -139,14 +139,14 @@ export const SCENES_DATA: SceneItem[] = [
     presenter: 'rafie',
     title: 'Scene Intro Pemateri 1: Rafie Armansyah (Zoom Center Tanpa Papan Tulis)',
     boardTitle: 'PEMATERI 1: RAFIE ARMANSYAH',
-    boardSubtitle: 'Pengantar Materi Pertidaksamaan Linear Satu & Dua Variabel (PLSV & PLDV)',
+    boardSubtitle: 'Pengantar Materi Pertidaksamaan Linear Satu & Dua Variabel (PtLSV & PtLDV)',
     visualType: 'presenter-intro',
     voScript: 'Halo semuanya! Selamat datang di video pembelajaran matematika kelompok kami. Kenalkan, gw Rafie Armansyah! Di bagian pertama ini, gw bakal memandu kalian membedah tuntas Pertidaksamaan Linear Satu Variabel dan Dua Variabel beserta 5 contoh soalnya. Yuk langsung kita mulai!',
     steps: [
       {
         label: 'Perkenalan Moderator & Pemateri 1: Rafie Armansyah',
         badge: 'Solo Zoom-In',
-        eq: 'Pertidaksamaan Linear Satu Variabel (PLSV) & Dua Variabel (PLDV)',
+        eq: 'Pertidaksamaan Linear Satu Variabel (PtLSV) & Dua Variabel (PtLDV)',
         desc: 'Kamera melakukan zoom-in fokus ke arah Rafie di tengah kelas sebelum masuk ke papan tulis.'
       },
       {
@@ -204,21 +204,21 @@ export const SCENES_DATA: SceneItem[] = [
     ]
   },
 
-  // 4. SCENE 03: KONSEP PLSV
+  // 4. SCENE 03: KONSEP PtLSV
   {
     id: 'scene-03',
-    compId: 'Scene03-KonsepPLSV',
+    compId: 'Scene03-KonsepPtLSV',
     code: 'Scene 03',
     part: 1,
     partName: 'Part 1: Intro & Linear',
     startMin: 5.5,
     endMin: 8,
     presenter: 'rafie',
-    title: 'Konsep Pertidaksamaan Linear Satu Variabel (PLSV)',
-    boardTitle: '1. PERTIDAKSAMAAN LINEAR SATU VARIABEL (PLSV)',
+    title: 'Konsep Pertidaksamaan Linear Satu Variabel (PtLSV)',
+    boardTitle: '1. PERTIDAKSAMAAN LINEAR SATU VARIABEL (PtLSV)',
     boardSubtitle: 'Bentuk Umum: ax + b < c • Visualisasi Garis Bilangan Terbuka (○) vs Tertutup (●)',
     visualType: 'number-line',
-    voScript: 'Sekarang kita masuk ke PLSV atau Pertidaksamaan Linear Satu Variabel. Di sini variabelnya cuma satu, yaitu x berpangkat satu. Tugas kita adalah mengisolasi x sendirian di ruas kiri dan menggambarnya di garis bilangan.',
+    voScript: 'Sekarang kita masuk ke PtLSV atau Pertidaksamaan Linear Satu Variabel. Di sini variabelnya cuma satu, yaitu x berpangkat satu. Tugas kita adalah mengisolasi x sendirian di ruas kiri dan menggambarnya di garis bilangan.',
     numberLineConfig: {
       points: [{ val: 2, filled: true, label: '2 (●)' }],
       shades: [{ from: 2, to: 5.5, label: 'HP: x ≥ 2' }],
@@ -226,11 +226,11 @@ export const SCENES_DATA: SceneItem[] = [
         { x: -1, sign: '−' },
         { x: 4, sign: '+' }
       ],
-      caption: 'Visualisasi PLSV: 2x − 4 ≥ 0 ⟹ 2x ≥ 4 ⟹ x ≥ 2 (Bulatan penuh ● karena tanda ≥)'
+      caption: 'Visualisasi PtLSV: 2x − 4 ≥ 0 ⟹ 2x ≥ 4 ⟹ x ≥ 2 (Bulatan penuh ● karena tanda ≥)'
     },
     steps: [
       {
-        label: 'Bentuk Umum & Isolasi Variabel PLSV',
+        label: 'Bentuk Umum & Isolasi Variabel PtLSV',
         badge: 'Langkah 1',
         eq: 'ax + b ≥ 0   (dengan a ≠ 0)',
         desc: 'Kelompokkan semua suku bervariabel x di ruas kiri dan konstanta angka di ruas kanan.'
@@ -250,21 +250,21 @@ export const SCENES_DATA: SceneItem[] = [
     ]
   },
 
-  // 5. SCENE 04: KONSEP PLDV
+  // 5. SCENE 04: KONSEP PtLDV
   {
     id: 'scene-04',
-    compId: 'Scene04-KonsepPLDV',
+    compId: 'Scene04-KonsepPtLDV',
     code: 'Scene 04',
     part: 1,
     partName: 'Part 1: Intro & Linear',
     startMin: 8,
     endMin: 11,
     presenter: 'rafie',
-    title: 'Konsep Pertidaksamaan Linear Dua Variabel (PLDV) & Grafik 2D',
-    boardTitle: '2. PERTIDAKSAMAAN LINEAR DUA VARIABEL (PLDV)',
+    title: 'Konsep Pertidaksamaan Linear Dua Variabel (PtLDV) & Grafik 2D',
+    boardTitle: '2. PERTIDAKSAMAAN LINEAR DUA VARIABEL (PtLDV)',
     boardSubtitle: 'Bentuk Umum: ax + by ≤ c • Daerah Himpunan Penyelesaian (DHP) & Metode Uji Titik (0,0)',
-    visualType: 'cartesian-pldv',
-    voScript: 'Lanjut ke PLDV yang punya dua variabel x dan y. Solusinya berupa luasan Daerah Himpunan Penyelesaian di bidang Kartesius 2D. Ingat: tanda ≤ atau ≥ pakai garis utuh, sedangkan < atau > pakai garis putus-putus!',
+    visualType: 'cartesian-ptldv',
+    voScript: 'Lanjut ke PtLDV yang punya dua variabel x dan y. Solusinya berupa luasan Daerah Himpunan Penyelesaian di bidang Kartesius 2D. Ingat: tanda ≤ atau ≥ pakai garis utuh, sedangkan < atau > pakai garis putus-putus!',
     cartesianConfig: {
       mode: 'case1',
       equation: '2x + 5y ≤ 10',
@@ -292,67 +292,155 @@ export const SCENES_DATA: SceneItem[] = [
     ]
   },
 
-  // 6. SCENE 05A: SOAL 1 & 2 PLSV
+  // 6. SCENE 05A: SOAL 1 PtLSV (DASAR & JEBAKAN BALIK TANDA)
   {
     id: 'scene-05a',
-    compId: 'Scene05A-SoalPLSV',
+    compId: 'Scene05A-Soal1-PtLSV',
     code: 'Scene 05A',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 11,
-    endMin: 13.5,
+    startMin: 11.0,
+    endMin: 12.0,
     presenter: 'rafie',
-    title: 'Pembahasan Contoh Soal 1 & 2 Pertidaksamaan Linear (PLSV)',
-    boardTitle: 'BEDAH TUNTAS CONTOH SOAL 1 & 2 (PLSV)',
-    boardSubtitle: 'Soal 1: PLSV Pembagian Negatif • Soal 2: PLSV Bentuk Pecahan (KPK = 6)',
+    title: 'Pembahasan Soal 1: PtLSV Dasar (Jebakan Balik Tanda)',
+    boardTitle: 'BEDAH SOAL 1: PtLSV DASAR & JEBAKAN BALIK TANDA',
+    boardSubtitle: '3(x - 2) + 4 < 5x - 6 • Pembagian Koefisien Negatif Mengharuskan Tanda Berbalik',
     visualType: 'number-line',
-    voScript: 'Kita langsung praktek ke Soal 1 dan Soal 2 PLSV. Perhatikan di Soal 1 saat −2x < −4 dibagi dengan −2, tandanya wajib berbalik dari kurang dari menjadi lebih dari sehingga x > 2. Di Soal 2 kita kalikan semua ruas dengan KPK 6.',
+    voScript: 'Kita masuk ke pembahasan Soal 1 PtLSV: 3(x - 2) + 4 < 5x - 6. Perhatikan saat -2x < -4 dibagi dengan -2, tanda ketaksamaan wajib berbalik arah menjadi x > 2!',
     numberLineConfig: {
-      points: [{ val: 2, filled: false, label: '2 (○ Soal 1)' }],
-      shades: [{ from: 2, to: 5.5, label: 'Soal 1: x > 2' }],
+      points: [{ val: 2, filled: false, label: '2 (○)' }],
+      shades: [{ from: 2, to: 5.5, label: 'HP: x > 2' }],
       signs: [
         { x: -1, sign: '−' },
         { x: 4, sign: '+' }
       ],
-      caption: 'Hasil Soal 1: HP = {x | x > 2, x ∈ ℝ} • Hasil Soal 2: HP = {x | x ≥ 14, x ∈ ℝ}'
+      caption: 'Hasil Soal 1: HP = {x | x > 2, x ∈ ℝ} • Interval: (2, ∞)'
     },
     steps: [
       {
-        label: 'Soal 1 (PLSV Dasar): 3(x − 2) + 4 < 5x − 6',
-        badge: 'Contoh Soal 1',
-        eq: '3x − 6 + 4 < 5x − 6  ⟹  3x − 2 < 5x − 6  ⟹  −2x < −4',
-        desc: 'Bagi kedua ruas dengan −2 (tanda < wajib berbalik arah menjadi >): x > (−4)/(−2) ⟹ x > 2. HP = {x | x > 2, x ∈ ℝ}.'
+        label: 'Ekspansi Distributif',
+        badge: 'Langkah 1',
+        eq: '3(x - 2) + 4 < 5x - 6 ⟹ 3x - 6 + 4 < 5x - 6',
+        desc: 'Distribusikan faktor 3 ke dalam tanda kurung.'
       },
       {
-        label: 'Soal 2 (PLSV Pecahan): (2x − 1)/3 − (x + 2)/2 ≥ 1',
-        badge: 'Contoh Soal 2',
-        eq: 'Kalikan KPK(3,2) = 6  ⟹  2(2x − 1) − 3(x + 2) ≥ 6',
-        desc: 'Jabarkan kurung: 4x − 2 − 3x − 6 ≥ 6.'
+        label: 'Sederhanakan & Pindah Ruas',
+        badge: 'Langkah 2',
+        eq: '3x - 2 < 5x - 6 ⟹ 3x - 5x < -6 + 2 ⟹ -2x < -4',
+        desc: 'Kumpulkan suku bervariabel x di ruas kiri dan konstanta di ruas kanan.'
       },
       {
-        label: 'Penyelesaian Akhir Soal 2',
-        badge: 'Hasil Soal 2',
-        eq: 'x − 8 ≥ 6  ⟹  x ≥ 14   ➔   HP = {x | x ≥ 14, x ∈ ℝ}',
-        desc: 'Karena kita mengalikan dengan +6 (positif) dan koefisien x positif, arah tanda ≥ tetap.'
+        label: 'Bagi Negatif (Tanda Berbalik!)',
+        badge: 'Langkah 3 (Kritis)',
+        eq: 'x > (-4) / (-2) ⟹ x > 2',
+        desc: 'Membagi dengan -2 membalik tanda < menjadi >. HP = {x | x > 2, x ∈ ℝ}.'
       }
     ]
   },
 
-  // 7. SCENE 05B: SOAL 3, 4 & 5 PLDV
+  // 7. SCENE 05B: SOAL 2 PtLSV (PECAHAN & DISTRIBUSI NEGATIF)
   {
     id: 'scene-05b',
-    compId: 'Scene05B-SoalPLDV',
+    compId: 'Scene05B-Soal2-PtLSV',
     code: 'Scene 05B',
     part: 1,
     partName: 'Part 1: Intro & Linear',
-    startMin: 13.5,
-    endMin: 16,
+    startMin: 12.0,
+    endMin: 13.0,
     presenter: 'rafie',
-    title: 'Pembahasan Contoh Soal 3, 4 & 5 (PLDV) + Transisi ke Ikhsan',
-    boardTitle: 'BEDAH TUNTAS CONTOH SOAL 3, 4 & 5 (PLDV KARTESIUS)',
-    boardSubtitle: 'Garis Utuh vs Garis Putus-putus & Sistem PLDV Kuadran I',
-    visualType: 'cartesian-pldv',
-    voScript: 'Untuk Soal 3, 4, dan 5 kita memetakan Daerah Himpunan Penyelesaian di bidang 2D. Di Soal 4, karena 4x − 3y > 12 memakai tanda >, garisnya putus-putus dan uji (0,0) salah sehingga diarsir menjauhi (0,0). Selanjutnya ada Pertidaksamaan Rasional yang bakal dijelasin sama rekan gw, Ikhsan. Silakan, San!',
+    title: 'Pembahasan Soal 2: PtLSV Bentuk Pecahan',
+    boardTitle: 'BEDAH SOAL 2: PtLSV PECAHAN & DISTRIBUSI NEGATIF',
+    boardSubtitle: '(2x - 1)/3 - (x + 2)/2 ≥ 1 • Hilangkan Penyebut dengan KPK 6',
+    visualType: 'number-line',
+    voScript: 'Soal 2 adalah PtLSV pecahan: (2x - 1)/3 - (x + 2)/2 ≥ 1. Kita hilangkan pecahan dengan mengalikan kedua ruas dengan KPK 6, lalu waspadai tanda minus saat mendistribusikan suku kedua.',
+    numberLineConfig: {
+      points: [{ val: 14, filled: true, label: '14 (●)' }],
+      shades: [{ from: 14, to: 18, label: 'HP: x ≥ 14' }],
+      signs: [
+        { x: 11, sign: '−' },
+        { x: 16, sign: '+' }
+      ],
+      caption: 'Hasil Soal 2: HP = {x | x ≥ 14, x ∈ ℝ} • Interval: [14, ∞)'
+    },
+    steps: [
+      {
+        label: 'Kalikan Kedua Ruas dengan KPK(3,2) = 6',
+        badge: 'Langkah 1',
+        eq: '6 · [(2x - 1)/3] - 6 · [(x + 2)/2] ≥ 6 · 1',
+        desc: 'Penyebut lenyap tanpa membalik tanda karena 6 bernilai positif.'
+      },
+      {
+        label: 'Hati-hati Distribusi Tanda Minus',
+        badge: 'Langkah 2 (Waspada)',
+        eq: '2(2x - 1) - 3(x + 2) ≥ 6 ⟹ 4x - 2 - 3x - 6 ≥ 6',
+        desc: 'Distribusi -3 ke +2 menghasilkan -6.'
+      },
+      {
+        label: 'Sederhanakan & Solusi Akhir',
+        badge: 'Langkah 3',
+        eq: 'x - 8 ≥ 6 ⟹ x ≥ 14',
+        desc: 'HP = {x | x ≥ 14, x ∈ ℝ} atau interval [14, ∞).'
+      }
+    ]
+  },
+
+  // 8. SCENE 05C: SOAL 3 PtLDV (GARIS UTUH SOLID)
+  {
+    id: 'scene-05c',
+    compId: 'Scene05C-Soal3-PtLDV',
+    code: 'Scene 05C',
+    part: 1,
+    partName: 'Part 1: Intro & Linear',
+    startMin: 13.0,
+    endMin: 14.0,
+    presenter: 'rafie',
+    title: 'Pembahasan Soal 3: PtLDV Garis Utuh',
+    boardTitle: 'BEDAH SOAL 3: PtLDV GARIS UTUH (SOLID)',
+    boardSubtitle: '2x + 5y ≤ 10 • Titik Potong (0,2) & (5,0) • Uji (0,0) BENAR',
+    visualType: 'cartesian-ptldv',
+    voScript: 'Sekarang kita masuk ke PtLDV 2D pada Soal 3: 2x + 5y ≤ 10. Garis pembatas digambar utuh solid karena memiliki tanda sama dengan, dan uji titik (0,0) menghasilkan pernyataan benar.',
+    cartesianConfig: {
+      mode: 'case1',
+      equation: '2x + 5y ≤ 10',
+      testText: 'Titik Potong (0,2) & (5,0) • Garis Utuh • Uji (0,0): 0 ≤ 10 (BENAR ✅ Arsir ke 0,0)'
+    },
+    steps: [
+      {
+        label: 'Titik Potong Sumbu X dan Y',
+        badge: 'Langkah 1',
+        eq: 'x = 0 ⟹ y = 2  →  (0, 2)  |  y = 0 ⟹ x = 5  →  (5, 0)',
+        desc: 'Garis persamaan pembatas 2x + 5y = 10 memotong kedua sumbu koordinat.'
+      },
+      {
+        label: 'Jenis Garis Pembatas',
+        badge: 'Langkah 2',
+        eq: 'Tanda ≤ (kurang dari atau sama dengan) ⟹ Garis Lurus Utuh (Solid)',
+        desc: 'Titik-titik tepat pada garis ikut menjadi solusi.'
+      },
+      {
+        label: 'Uji Titik Sembarang (0,0)',
+        badge: 'Langkah 3',
+        eq: '2(0) + 5(0) ≤ 10 ⟹ 0 ≤ 10 (BENAR ✅)',
+        desc: 'DHP adalah wilayah sisi garis yang memuat titik asal (0,0).'
+      }
+    ]
+  },
+
+  // 9. SCENE 05D: SOAL 4 PtLDV (GARIS PUTUS-PUTUS DASHED)
+  {
+    id: 'scene-05d',
+    compId: 'Scene05D-Soal4-PtLDV',
+    code: 'Scene 05D',
+    part: 1,
+    partName: 'Part 1: Intro & Linear',
+    startMin: 14.0,
+    endMin: 15.0,
+    presenter: 'rafie',
+    title: 'Pembahasan Soal 4: PtLDV Garis Putus-putus',
+    boardTitle: 'BEDAH SOAL 4: PtLDV GARIS PUTUS-PUTUS (DASHED)',
+    boardSubtitle: '4x - 3y > 12 • Titik Potong (0,-4) & (3,0) • Uji (0,0) SALAH',
+    visualType: 'cartesian-ptldv',
+    voScript: 'Soal 4 adalah 4x - 3y > 12. Karena tandanya lebih dari murni tanpa sama dengan, garis pembatas wajib putus-putus, dan uji titik (0,0) salah sehingga arsiran menjauhi (0,0).',
     cartesianConfig: {
       mode: 'case2',
       equation: '4x − 3y > 12',
@@ -360,22 +448,64 @@ export const SCENES_DATA: SceneItem[] = [
     },
     steps: [
       {
-        label: 'Soal 3 (PLDV Garis Utuh): 2x + 5y ≤ 10',
-        badge: 'Contoh Soal 3',
-        eq: 'Titik Potong (0,2) & (5,0) • Garis Utuh • Uji (0,0): 0 ≤ 10 (BENAR)',
-        desc: 'Kesimpulan Soal 3: Arsir daerah bawah-kiri garis yang memuat titik (0,0).'
+        label: 'Titik Potong Sumbu X dan Y',
+        badge: 'Langkah 1',
+        eq: 'x = 0 ⟹ y = -4  →  (0, -4)  |  y = 0 ⟹ x = 3  →  (3, 0)',
+        desc: 'Garis persamaan pembatas 4x - 3y = 12 memotong sumbu Y negatif dan sumbu X positif.'
       },
       {
-        label: 'Soal 4 (PLDV Garis Putus-putus): 4x − 3y > 12',
-        badge: 'Contoh Soal 4',
-        eq: 'Titik Potong (0,−4) & (3,0) • Garis Putus-putus • Uji (0,0): 0 > 12 (SALAH)',
-        desc: 'Kesimpulan Soal 4: Arsir daerah di seberang garis (kanan-bawah) yang menjauhi titik (0,0).'
+        label: 'Jenis Garis Pembatas',
+        badge: 'Langkah 2',
+        eq: 'Tanda > (lebih dari murni) ⟹ Garis Putus-putus (Dashed)',
+        desc: 'Titik-titik tepat pada garis tidak termasuk solusi.'
       },
       {
-        label: 'Soal 5 (Sistem PLDV): x + y ≥ 4; x ≥ 0; y ≥ 0',
-        badge: 'Contoh Soal 5',
-        eq: 'Garis melalui (0,4) & (4,0) • Uji (0,0): 0 ≥ 4 (SALAH) • Batas Kuadran I',
-        desc: 'Kesimpulan Soal 5: DHP berada di Kuadran I (x ≥ 0, y ≥ 0) di sebelah ATAS/KANAN garis x + y = 4.'
+        label: 'Uji Titik Sembarang (0,0)',
+        badge: 'Langkah 3',
+        eq: '4(0) - 3(0) > 12 ⟹ 0 > 12 (SALAH ❌)',
+        desc: 'DHP adalah wilayah sisi garis yang TIDAK memuat titik asal (0,0).'
+      }
+    ]
+  },
+
+  // 10. SCENE 05E: SOAL 5 SISTEM PtLDV (KUADRAN I)
+  {
+    id: 'scene-05e',
+    compId: 'Scene05E-Soal5-SistemPtLDV',
+    code: 'Scene 05E',
+    part: 1,
+    partName: 'Part 1: Intro & Linear',
+    startMin: 15.0,
+    endMin: 16.0,
+    presenter: 'rafie',
+    title: 'Pembahasan Soal 5: Aplikasi Sistem PtLDV',
+    boardTitle: 'BEDAH SOAL 5: SISTEM PtLDV KUADRAN I',
+    boardSubtitle: 'x + y ≥ 4 ; x ≥ 0 ; y ≥ 0 • Irisan DHP Kuadran I + Transisi ke Ikhsan',
+    visualType: 'cartesian-ptldv',
+    voScript: 'Soal 5 adalah Sistem PtLDV: x + y ≥ 4 dengan kendala non-negatif x ≥ 0 dan y ≥ 0. DHP berada di Kuadran I di atas garis. Selanjutnya, materi Rasional akan dibahas oleh Ikhsan!',
+    cartesianConfig: {
+      mode: 'case3',
+      equation: 'x + y ≥ 4 ; x ≥ 0 ; y ≥ 0',
+      testText: 'Titik Potong (0,4) & (4,0) • Uji (0,0): 0 ≥ 4 (SALAH ❌) • Irisan Kuadran I'
+    },
+    steps: [
+      {
+        label: 'Garis Utama & Uji Titik',
+        badge: 'Kendala 1',
+        eq: 'x + y = 4  →  (0, 4) & (4, 0)  |  Uji (0,0): 0 ≥ 4 (SALAH ❌)',
+        desc: 'Arsir menjauhi (0,0) ke arah atas-kanan garis.'
+      },
+      {
+        label: 'Syarat Non-Negatif (Kuadran I)',
+        badge: 'Kendala 2 & 3',
+        eq: 'x ≥ 0 (Kanan sumbu Y)  dan  y ≥ 0 (Atas sumbu X)',
+        desc: 'Membatasi daerah penyelesaian hanya pada Kuadran I.'
+      },
+      {
+        label: 'Daerah Bersih Irisan (DHP)',
+        badge: 'Kesimpulan',
+        eq: 'DHP = Irisan ketiganya (Wilayah Kuadran I di atas garis x + y = 4)',
+        desc: 'Transisi materi berikutnya: Pertidaksamaan Rasional oleh Ikhsan.'
       }
     ]
   },
@@ -911,10 +1041,10 @@ export const SCENES_DATA: SceneItem[] = [
     voScript: 'Terima kasih, Dimas, Pras, dan Ikhsan buat penjelasannya! Nah, itu dia teman-teman, 4 cabang utama dari materi Pertidaksamaan: mulai dari Linear, Rasional, Irasional, sampai Nilai Mutlak lengkap dengan 20 contoh soalnya. Terima kasih udah nonton video presentasi kelompok kami, sampai jumpa!',
     steps: [
       {
-        label: '1. Linear (PLSV & PLDV) — Rafie Armansyah',
+        label: '1. Linear (PtLSV & PtLDV) — Rafie Armansyah',
         badge: 'Ringkasan 1',
-        eq: 'Kali/Bagi Negatif Balik Tanda • PLDV: Garis Utuh (≤/≥), Putus (< / >), Uji (0,0)',
-        desc: 'PLSV diselesaikan pada garis bilangan 1D, sedangkan PLDV menghasilkan Daerah Himpunan Penyelesaian (DHP) 2D.'
+        eq: 'Kali/Bagi Negatif Balik Tanda • PtLDV: Garis Utuh (≤/≥), Putus (< / >), Uji (0,0)',
+        desc: 'PtLSV diselesaikan pada garis bilangan 1D, sedangkan PtLDV menghasilkan Daerah Himpunan Penyelesaian (DHP) 2D.'
       },
       {
         label: '2. Rasional (Ikhsan) & 3. Irasional (Pras)',

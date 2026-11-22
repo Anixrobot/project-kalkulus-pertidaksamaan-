@@ -269,7 +269,7 @@ export const Scene01_Intro: React.FC = memo(() => {
                         Bagian 1 • Rafie
                       </span>
                       <span style={{ fontSize: 10, backgroundColor: "#065f46", color: "#a7f3d0", padding: "2px 6px", borderRadius: 4, fontFamily: "monospace" }}>
-                        PLSV & PLDV
+                        PtLSV & PtLDV
                       </span>
                     </div>
                     <h3 style={{ color: "#ffffff", fontSize: 16, fontWeight: "bold", margin: "4px 0" }}>

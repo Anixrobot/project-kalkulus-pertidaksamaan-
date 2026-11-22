@@ -42,7 +42,7 @@ export const CartesianPlot: React.FC<CartesianPlotProps> = memo(({ config, class
     ],
     testPoint: { x: 0, y: 0, satisfies: true, label: "Uji (0,0) -> 0 <= 10 (BENAR)" },
     shadeRegion: "below",
-    caption: "Daerah Himpunan Penyelesaian (DHP) PLDV di Bawah Garis Batas",
+    caption: "Daerah Himpunan Penyelesaian (DHP) PtLDV di Bawah Garis Batas",
   };
 
   const { lines, points, testPoint, shadeRegion, caption } = currentConfig;
@@ -153,7 +153,7 @@ export const CartesianPlot: React.FC<CartesianPlotProps> = memo(({ config, class
           </text>
         ))}
 
-        {/* ── 4. Garis-Garis Batas Pembatas PLDV ── */}
+        {/* ── 4. Garis-Garis Batas Pembatas PtLDV ── */}
         {lines.map((ln, idx) => {
           const x1 = -1.5;
           const y1 = (ln.slope ?? -0.4) * x1 + (ln.intercept ?? 2);

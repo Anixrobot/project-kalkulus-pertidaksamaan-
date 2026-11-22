@@ -8,12 +8,13 @@ import {
   Part1Linear,
   Part2Rasional,
   Part3Irasional,
-  Part4Mutlak
+  Part4Mutlak,
 } from './scenes/FullVideo';
 
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* ── KOMPOSISI 20 SCENE KELOMPOK (DIPERBARUI LANGSUNG DENGAN V4.0 SLATE & SVG) ── */}
       <Folder name="1-Render-Per-Scene">
         {SCENES_DATA.map((sc) => {
           const durationInFrames = Math.round((sc.endMin - sc.startMin) * 60 * FPS);
@@ -31,6 +32,7 @@ export const RemotionRoot: React.FC = () => {
         })}
       </Folder>
 
+      {/* ── 4 PART VIDEO UTAMA KELOMPOK ── */}
       <Folder name="2-Render-Per-Part">
         <Composition
           id="Part1-Linear-Rafie"
@@ -66,6 +68,7 @@ export const RemotionRoot: React.FC = () => {
         />
       </Folder>
 
+      {/* ── FULL VIDEO UTUH 60 MENIT ── */}
       <Composition
         id="FullVideo"
         component={FullVideo}

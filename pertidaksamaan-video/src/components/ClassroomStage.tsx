@@ -4,6 +4,16 @@ import { SceneItem, CHARACTERS_INFO } from '../data/scenesData';
 import { ChalkboardVisualizer } from './ChalkboardVisualizer';
 import { TeacherCharacter } from './TeacherCharacter';
 import { Scene01_Intro } from './Scene01_Intro';
+import {
+  LinearScene1_IntroAturanMutlak,
+  LinearScene2_KonsepPtLSV,
+  LinearScene4_KonsepPtLDV,
+  Scene05A_Soal1_PtLSV,
+  Scene05B_Soal2_PtLSV,
+  Scene05C_Soal3_PtLDV,
+  Scene05D_Soal4_PtLDV,
+  Scene05E_Soal5_SistemPtLDV,
+} from '../scenes/linear';
 
 export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   const frame = useCurrentFrame();
@@ -12,6 +22,50 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   // Khusus Scene 01 Intro: Tampilkan langsung komponen visual animasi 3 sub-sekuens
   if (scene.id === 'scene-01' || scene.compId === 'Scene01-Intro') {
     return <Scene01_Intro />;
+  }
+
+  // ── INTEGRASI V4.1: PERBARUI SCENE PERTIDAKSAMAAN LINEAR (RAFIE) BER-STEP ──
+  // Scene 02: Hukum Fundamental & Aturan Balik Tanda (3 Fase)
+  if (scene.id === 'scene-02' || scene.compId === 'Scene02-HukumFundamental') {
+    return <LinearScene1_IntroAturanMutlak />;
+  }
+  // Scene 03: Konsep PtLSV & Garis Bilangan 1D (2 Fase)
+  if (scene.id === 'scene-03' || scene.compId === 'Scene03-KonsepPtLSV' || scene.compId === 'Scene03-KonsepPLSV') {
+    return <LinearScene2_KonsepPtLSV />;
+  }
+  // Scene 04: Konsep PtLDV, Garis Pembatas & Uji Titik (0,0) (2 Fase)
+  if (scene.id === 'scene-04' || scene.compId === 'Scene04-KonsepPtLDV' || scene.compId === 'Scene04-KonsepPLDV') {
+    return <LinearScene4_KonsepPtLDV />;
+  }
+  // Scene 05A: Soal 1 PtLSV (Jebakan Balik Tanda)
+  if (
+    scene.id === 'scene-05a' ||
+    scene.compId === 'Scene05A-Soal1-PtLSV' ||
+    scene.compId === 'Scene05A-SoalPtLSV' ||
+    scene.compId === 'Scene05A-SoalPLSV'
+  ) {
+    return <Scene05A_Soal1_PtLSV />;
+  }
+  // Scene 05B: Soal 2 PtLSV (Pecahan & Distribusi Negatif)
+  if (scene.id === 'scene-05b' || scene.compId === 'Scene05B-Soal2-PtLSV') {
+    return <Scene05B_Soal2_PtLSV />;
+  }
+  // Scene 05C: Soal 3 PtLDV (Garis Utuh Solid)
+  if (
+    scene.id === 'scene-05c' ||
+    scene.compId === 'Scene05C-Soal3-PtLDV' ||
+    scene.compId === 'Scene05B-SoalPtLDV' ||
+    scene.compId === 'Scene05B-SoalPLDV'
+  ) {
+    return <Scene05C_Soal3_PtLDV />;
+  }
+  // Scene 05D: Soal 4 PtLDV (Garis Putus-putus Dashed)
+  if (scene.id === 'scene-05d' || scene.compId === 'Scene05D-Soal4-PtLDV') {
+    return <Scene05D_Soal4_PtLDV />;
+  }
+  // Scene 05E: Soal 5 Sistem PtLDV (Kuadran I via layerPolygons)
+  if (scene.id === 'scene-05e' || scene.compId === 'Scene05E-Soal5-SistemPtLDV') {
+    return <Scene05E_Soal5_SistemPtLDV />;
   }
 
   // ── Auto-Switch & Timing Langkah Berbasis useCurrentFrame ──

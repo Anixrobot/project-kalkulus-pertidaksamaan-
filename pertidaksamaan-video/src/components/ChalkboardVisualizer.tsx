@@ -427,7 +427,7 @@ export const ChalkboardVisualizer: React.FC<{
             </div>
           )}
 
-          {scene.visualType === 'cartesian-pldv' && scene.cartesianConfig && (
+          {scene.visualType === 'cartesian-ptldv' && scene.cartesianConfig && (
             <div
               style={{
                 padding: 10,
@@ -635,7 +635,7 @@ export const ChalkboardVisualizer: React.FC<{
                 <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
                   <div style={{ fontWeight: 900, color: '#93c5fd' }}>1. Linear (Rafie)</div>
                   <div style={{ fontSize: 10, color: '#e2e8f0', marginTop: 1 }}>
-                    PLSV Garis Bilangan & PLDV Uji (0,0). Kali/bagi negatif balik tanda!
+                    PtLSV Garis Bilangan & PtLDV Uji (0,0). Kali/bagi negatif balik tanda!
                   </div>
                 </div>
                 <div style={{ padding: 6, borderRadius: 8, backgroundColor: 'rgba(2,44,34,0.75)', border: '1px solid rgba(16,185,129,0.3)' }}>
