@@ -3,6 +3,21 @@ import { Series } from 'remotion';
 import { SCENES_DATA, FPS } from '../data/scenesData';
 import { ClassroomStage } from '../components/ClassroomStage';
 
+export const getSceneDuration = (sc: typeof SCENES_DATA[0]): number => {
+  return sc.durationFrames ?? Math.round((sc.endMin - sc.startMin) * 60 * FPS);
+};
+
+export const getPartDuration = (partNumber: number): number => {
+  return SCENES_DATA.filter((s) => s.part === partNumber).reduce(
+    (acc, sc) => acc + getSceneDuration(sc),
+    0
+  );
+};
+
+export const getTotalDuration = (): number => {
+  return SCENES_DATA.reduce((acc, sc) => acc + getSceneDuration(sc), 0);
+};
+
 export const PartSequence: React.FC<{ partNumber?: number }> = ({ partNumber }) => {
   const scenes = partNumber
     ? SCENES_DATA.filter((s) => s.part === partNumber)
@@ -11,7 +26,7 @@ export const PartSequence: React.FC<{ partNumber?: number }> = ({ partNumber }) 
   return (
     <Series>
       {scenes.map((sc) => {
-        const durationInFrames = Math.round((sc.endMin - sc.startMin) * 60 * FPS);
+        const durationInFrames = getSceneDuration(sc);
         return (
           <Series.Sequence key={sc.id} durationInFrames={durationInFrames}>
             <ClassroomStage scene={sc} />

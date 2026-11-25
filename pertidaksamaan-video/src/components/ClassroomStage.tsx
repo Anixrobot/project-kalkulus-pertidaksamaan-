@@ -14,6 +14,27 @@ import {
   Scene05D_Soal4_PtLDV,
   Scene05E_Soal5_SistemPtLDV,
 } from '../scenes/linear';
+import {
+  RasionalScene1_Konsep,
+  Scene07A_Rasional_Soal1,
+  Scene07B_Rasional_Soal2,
+  Scene07C_Rasional_Soal3,
+  Scene07D_Rasional_Soal4,
+  Scene07E_Rasional_Soal5,
+  RasionalScene_KesalahanRingkasan,
+} from '../scenes/rasional';
+import {
+  IrasionalScene1_Konsep,
+  Scene09A_Irasional_Soal1,
+  Scene09B_Irasional_Soal2,
+  IrasionalScene_Ringkasan,
+} from '../scenes/irasional';
+import {
+  MutlakScene1_Konsep,
+  Scene11A_Mutlak_Soal1,
+  Scene11B_Mutlak_Soal2,
+  Scene11C_Mutlak_KesalahanRingkasan,
+} from '../scenes/mutlak';
 
 export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   const frame = useCurrentFrame();
@@ -66,6 +87,120 @@ export const ClassroomStage: React.FC<{ scene: SceneItem }> = ({ scene }) => {
   // Scene 05E: Soal 5 Sistem PtLDV (Kuadran I via layerPolygons)
   if (scene.id === 'scene-05e' || scene.compId === 'Scene05E-Soal5-SistemPtLDV') {
     return <Scene05E_Soal5_SistemPtLDV />;
+  }
+
+  // ── SEGMEN 2: PERTIDAKSAMAAN RASIONAL (IKHSAN) V4.1 ──
+  // Scene 06B: Konsep Rasional (3 Fase via Sequence)
+  if (
+    scene.id === 'scene-06b' ||
+    scene.id === 'scene-06' ||
+    scene.compId === 'Scene06B-KonsepRasional' ||
+    scene.compId === 'Scene06-KonsepRasional'
+  ) {
+    return <RasionalScene1_Konsep />;
+  }
+  // Scene 07A: Soal 1 Rasional
+  if (
+    scene.id === 'scene-07a' ||
+    scene.compId === 'Scene07A-Rasional-Soal1' ||
+    scene.compId === 'Scene07A-SoalRasional123'
+  ) {
+    return <Scene07A_Rasional_Soal1 />;
+  }
+  // Scene 07B: Soal 2 Rasional
+  if (scene.id === 'scene-07b' || scene.compId === 'Scene07B-Rasional-Soal2') {
+    return <Scene07B_Rasional_Soal2 />;
+  }
+  // Scene 07C: Soal 3 Rasional
+  if (scene.id === 'scene-07c' || scene.compId === 'Scene07C-Rasional-Soal3') {
+    return <Scene07C_Rasional_Soal3 />;
+  }
+  // Scene 07D: Soal 4 Rasional
+  if (
+    scene.id === 'scene-07d' ||
+    scene.compId === 'Scene07D-Rasional-Soal4' ||
+    scene.compId === 'Scene07B-SoalRasional45'
+  ) {
+    return <Scene07D_Rasional_Soal4 />;
+  }
+  // Scene 07E: Soal 5 Rasional (Jebakan Faktor Sama)
+  if (scene.id === 'scene-07e' || scene.compId === 'Scene07E-Rasional-Soal5') {
+    return <Scene07E_Rasional_Soal5 />;
+  }
+  // Scene 07F: Kesalahan Umum & Ringkasan Rasional
+  if (
+    scene.id === 'scene-07f' ||
+    scene.compId === 'Scene07F-Rasional-KesalahanRingkasan'
+  ) {
+    return <RasionalScene_KesalahanRingkasan />;
+  }
+
+  // ── SEGMEN 3: PERTIDAKSAMAAN IRASIONAL (PRAS) V4.1 ──
+  // Scene 08B: Konsep Irasional (3 Fase via Sequence)
+  if (
+    scene.id === 'scene-08b' ||
+    scene.id === 'scene-08' ||
+    scene.compId === 'Scene08B-KonsepIrasional' ||
+    scene.compId === 'Scene08-KonsepIrasional'
+  ) {
+    return <IrasionalScene1_Konsep />;
+  }
+  // Scene 09A: Soal 1 Irasional
+  if (
+    scene.id === 'scene-09a' ||
+    scene.compId === 'Scene09A-Irasional-Soal1' ||
+    scene.compId === 'Scene09A-SoalIrasional12'
+  ) {
+    return <Scene09A_Irasional_Soal1 />;
+  }
+  // Scene 09B: Soal 2 Irasional
+  if (
+    scene.id === 'scene-09b' ||
+    scene.compId === 'Scene09B-Irasional-Soal2' ||
+    scene.compId === 'Scene09B-SoalIrasional345'
+  ) {
+    return <Scene09B_Irasional_Soal2 />;
+  }
+  // Scene 09C: Ringkasan 3 Pilar Irasional
+  if (
+    scene.id === 'scene-09c' ||
+    scene.compId === 'Scene09C-Irasional-Ringkasan'
+  ) {
+    return <IrasionalScene_Ringkasan />;
+  }
+
+  // ── SEGMEN 4: PERTIDAKSAMAAN NILAI MUTLAK (DIMAS) V4.1 ──
+  // Scene 10B: Konsep Mutlak (3 Fase via Sequence)
+  if (
+    scene.id === 'scene-10b' ||
+    scene.id === 'scene-10' ||
+    scene.compId === 'Scene10B-KonsepMutlak' ||
+    scene.compId === 'Scene10-KonsepMutlak'
+  ) {
+    return <MutlakScene1_Konsep />;
+  }
+  // Scene 11A: Soal 1 Mutlak (< Mengumpul di Tengah)
+  if (
+    scene.id === 'scene-11a' ||
+    scene.compId === 'Scene11A-Mutlak-Soal1' ||
+    scene.compId === 'Scene11A-SoalMutlak12'
+  ) {
+    return <Scene11A_Mutlak_Soal1 />;
+  }
+  // Scene 11B: Soal 2 Mutlak (>= Memencar Keluar)
+  if (
+    scene.id === 'scene-11b' ||
+    scene.compId === 'Scene11B-Mutlak-Soal2' ||
+    scene.compId === 'Scene11B-SoalMutlak345'
+  ) {
+    return <Scene11B_Mutlak_Soal2 />;
+  }
+  // Scene 11C: Kesalahan & Tabel Rumus Cepat Mutlak
+  if (
+    scene.id === 'scene-11c' ||
+    scene.compId === 'Scene11C-Mutlak-KesalahanRingkasan'
+  ) {
+    return <Scene11C_Mutlak_KesalahanRingkasan />;
   }
 
   // ── Auto-Switch & Timing Langkah Berbasis useCurrentFrame ──

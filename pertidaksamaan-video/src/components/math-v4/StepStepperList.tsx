@@ -31,10 +31,10 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
-  // Sliding window offset presisi: maksimal 3 kartu dalam viewport
-  const CARD_HEIGHT = 56; // Tinggi pasti per kartu langkah aljabar
+  // Sliding window offset presisi: maksimal 3 kartu dalam viewport (54*3 + 6*2 = 174px pas di dalam container 218px)
+  const CARD_HEIGHT = 54; // Tinggi pasti per kartu langkah aljabar
   const CARD_GAP = 6;     // Gap antar kartu
-  const STEP_UNIT = CARD_HEIGHT + CARD_GAP; // 62px per langkah
+  const STEP_UNIT = CARD_HEIGHT + CARD_GAP; // 60px per langkah
   const targetScrollIndex = Math.max(0, activeStepIndex - 2);
   const translateY = -(targetScrollIndex * STEP_UNIT);
 
@@ -43,20 +43,25 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
       className={`relative w-full overflow-hidden rounded-xl border border-slate-700/80 bg-slate-900/90 p-2 shadow-md ${className}`}
       style={{ height: 218, boxSizing: 'border-box' }}
     >
-      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex justify-between items-center border-b border-slate-800 pb-1">
+      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex justify-between items-center border-b border-slate-800 pb-1">
         <span>Alur Pengerjaan Aljabar</span>
         <span className="font-mono text-sky-400 text-[10px]">
           Langkah {Math.min(activeStepIndex + 1, steps.length)} dari {steps.length}
         </span>
       </div>
 
+      {/* Viewport kartu khusus di bawah header agar kartu ter-scroll tidak menimpa judul */}
       <div
-        className="relative flex flex-col transition-transform"
-        style={{
-          gap: CARD_GAP,
-          transform: `translateY(${translateY}px)`,
-        }}
+        className="relative w-full overflow-hidden"
+        style={{ height: CARD_HEIGHT * 3 + CARD_GAP * 2 }}
       >
+        <div
+          className="relative flex flex-col"
+          style={{
+            gap: CARD_GAP,
+            transform: `translateY(${translateY}px)`,
+          }}
+        >
         {steps.map((st, i) => {
           const isRevealed = i <= activeStepIndex;
           const isActive = i === activeStepIndex;
@@ -78,10 +83,19 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
             config: { damping: 14, stiffness: 100 },
           });
 
+          const isLongFormula = st.latex.length > 52;
+          const formulaFontSize = st.isAlert
+            ? isLongFormula
+              ? 10.5
+              : 11.5
+            : isLongFormula
+            ? 10
+            : 11;
+
           return (
             <div
               key={i}
-              className={`rounded-lg px-2 py-1.5 transition-all flex flex-col justify-between ${
+              className={`rounded-lg px-2 py-1 flex flex-col justify-between ${
                 st.isAlert
                   ? 'border-2 border-rose-500 bg-rose-950/35'
                   : isActive
@@ -102,11 +116,11 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
               }}
             >
               {/* Baris Rumus Penuh di Atas (white-space: nowrap) */}
-              <div className="flex items-center justify-between overflow-x-auto no-scrollbar">
+              <div className="flex items-center justify-between overflow-hidden">
                 <div style={{ whiteSpace: 'nowrap' }}>
                   <MathFormula
                     math={st.latex}
-                    fontSize={st.isAlert ? 12 : 11.5}
+                    fontSize={formulaFontSize}
                     color={st.isAlert ? '#f43f5e' : '#f8fafc'}
                   />
                 </div>
@@ -131,6 +145,7 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
