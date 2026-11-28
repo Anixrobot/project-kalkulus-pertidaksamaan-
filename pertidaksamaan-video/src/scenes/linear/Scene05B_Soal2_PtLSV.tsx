@@ -22,16 +22,22 @@ export const Scene05B_Soal2_PtLSV: React.FC<LinearSceneProps> = () => {
   const prob = PTLSV_DATA[2]; // soal-2
   const totalSteps = prob.steps.length;
 
-  const algebraDuration = Math.floor(durationInFrames * 0.72);
-  const framesPerStep = Math.max(1, Math.floor(algebraDuration / totalSteps));
-  const activeStepIndex = Math.min(totalSteps - 1, Math.floor(frame / framesPerStep));
-  const isFinalStepReached = frame >= algebraDuration;
+  // Bagi frame bertahap anti-spoiler: langkah akhir & solusi tampil hanya pada finalStepStart (78%)
+  const finalStepStart = Math.floor(durationInFrames * 0.78);
+  const introStepsCount = Math.max(1, totalSteps - 1);
+  const framesPerStep = Math.max(1, Math.floor(finalStepStart / introStepsCount));
+  const isFinalStepReached = frame >= finalStepStart;
+  const activeStepIndex = isFinalStepReached
+    ? totalSteps - 1
+    : Math.min(introStepsCount - 1, Math.floor(frame / framesPerStep));
 
-  const graphEntranceSpring = spring({
-    frame: frame - algebraDuration,
-    fps,
-    config: { damping: 14, stiffness: 80 },
-  });
+  const hpRevealSpring = isFinalStepReached
+    ? spring({
+        frame: frame - finalStepStart,
+        fps,
+        config: { damping: 14, stiffness: 85 },
+      })
+    : 0;
 
   const leftContent = (
     <div className="flex flex-col gap-1.5 w-full">
@@ -45,9 +51,9 @@ export const Scene05B_Soal2_PtLSV: React.FC<LinearSceneProps> = () => {
             {prob.subtitle}
           </span>
         </div>
-        <div className="rounded-lg bg-slate-900/90 px-2 py-1 border border-slate-700/60 flex items-center justify-between">
-          <span className="text-[10px] text-slate-400 font-semibold">Tentukan HP dari:</span>
-          <MathFormula math={prob.problemLatex} fontSize={12} color="#fbbf24" />
+        <div className="rounded-lg bg-slate-900/90 px-2 py-1 border border-slate-700/60 flex items-center justify-between gap-2">
+          <span className="text-[10px] text-slate-400 font-semibold shrink-0">Tentukan HP dari:</span>
+          <MathFormula math={prob.problemLatex} fontSize={11.5} color="#fbbf24" />
         </div>
       </div>
 
@@ -58,33 +64,27 @@ export const Scene05B_Soal2_PtLSV: React.FC<LinearSceneProps> = () => {
         accentColor="#fbbf24"
       />
 
-      {/* Kesimpulan Himpunan Penyelesaian */}
+      {/* Kesimpulan Himpunan Penyelesaian (Anti-Spoiler: opacity 0 sebelum langkah akhir) */}
       <div
-        className={`rounded-xl border px-2 py-1.5 flex items-center justify-between transition-all ${
-          isFinalStepReached
-            ? 'border-emerald-500/60 bg-emerald-950/40'
-            : 'border-slate-800 bg-slate-900/60 opacity-60'
-        }`}
+        className="rounded-xl border border-emerald-500/60 bg-emerald-950/40 px-2 py-1.5 flex flex-wrap items-center justify-between gap-1.5"
+        style={{
+          opacity: isFinalStepReached ? hpRevealSpring : 0,
+          transform: `translateY(${(1 - hpRevealSpring) * 6}px)`,
+        }}
       >
-        <span className="text-[9.5px] font-bold text-emerald-400">Himpunan Penyelesaian:</span>
-        <div className="flex items-center gap-2">
-          <MathFormula math={prob.solution.latex} fontSize={12} color="#10b981" />
-          <span className="text-slate-400 text-[9.5px] font-mono">
-            <MathFormula math={prob.solution.intervalLatex} fontSize={11} color="#fbbf24" />
-          </span>
+        <span className="text-[9.5px] font-bold text-emerald-400 shrink-0">
+          Himpunan Penyelesaian:
+        </span>
+        <div className="flex items-center gap-2 shrink-0">
+          <MathFormula math={prob.solution.latex} fontSize={11.5} color="#10b981" />
+          <MathFormula math={prob.solution.intervalLatex} fontSize={11} color="#fbbf24" />
         </div>
       </div>
     </div>
   );
 
   const rightContent = (
-    <div
-      className="flex flex-col items-center justify-center w-full"
-      style={{
-        opacity: isFinalStepReached ? graphEntranceSpring : 0.45,
-        transform: `scale(${isFinalStepReached ? 0.96 + graphEntranceSpring * 0.04 : 0.96})`,
-      }}
-    >
+    <div className="flex flex-col items-center justify-center w-full">
       <div className="mb-1 text-center">
         <div className="text-[11.5px] font-bold text-slate-200">
           Plot Solusi Garis Bilangan
@@ -92,7 +92,7 @@ export const Scene05B_Soal2_PtLSV: React.FC<LinearSceneProps> = () => {
         <div className="text-[9.5px] text-slate-400">
           {isFinalStepReached
             ? `Titik batas x = ${prob.solution.boundaryValue} (Bulatan Penuh ●, arah kanan)`
-            : 'Selesaikan aljabar di kiri untuk memplot garis bilangan'}
+            : 'Selesaikan langkah aljabar di kiri untuk memplot solusi'}
         </div>
       </div>
 
@@ -106,6 +106,8 @@ export const Scene05B_Soal2_PtLSV: React.FC<LinearSceneProps> = () => {
         accentColor="#10b981"
         width={315}
         height={100}
+        showSolution={isFinalStepReached}
+        solutionStartFrame={finalStepStart}
       />
     </div>
   );

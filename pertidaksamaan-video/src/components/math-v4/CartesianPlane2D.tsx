@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import { useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
 import { Point, PtLDVLayer, mapMathToSvg } from '../../data/mathData';
 import { MathFormula } from './MathFormula';
@@ -23,15 +23,16 @@ export interface CartesianPlane2DProps {
   width?: number;
   height?: number;
   startFrame?: number;
+  activeStep?: number; // 1..5 untuk sinkronisasi ketat 1:1 dengan step kiri; undefined = mode otonom
+  stepStartFrame?: number; // Frame awal ketika activeStep aktif
   className?: string;
   style?: React.CSSProperties;
 }
 
 /**
- * Komponen CartesianPlane2D V4.0 (PtLDV)
- * Grafik bidang Kartesius 2D SVG murni, frame-deterministic, dan presisi.
- * Mendukung 5 urutan tahap animasi wajib, mapping mapMathToSvg, lineSegmentInViewport,
- * dhpPolygon, dan layerPolygons.
+ * Komponen CartesianPlane2D V4.2 (PtLDV)
+ * Grafik bidang Kartesius 2D SVG murni, frame-deterministic, dan sinkron 1:1 dengan langkah aljabar.
+ * Mendukung mode terkontrol (activeStep 1..5) serta kompatibel mundur untuk mode otonom.
  */
 export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
   viewport,
@@ -47,50 +48,78 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
   width = 460,
   height = 360,
   startFrame = 0,
+  activeStep,
+  stepStartFrame = 0,
   className = '',
   style = {},
 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
+  const uid = useId().replace(/:/g, '');
+  const clipId = `${uid}-viewport-clip`;
+
   const relFrame = Math.max(0, frame - startFrame);
+  const stepLocalFrame = Math.max(0, frame - stepStartFrame);
+  const isControlled = activeStep !== undefined;
+  const isSystemMode = Boolean(layerPolygons && layerPolygons.length >= 3);
 
-  const pad = width <= 350 ? 32 : 42;
-  const svgSize = { width, height, padding: pad };
+  // Sesuaikan lebar SVG di dalam kartu berpading p-2 (16px + 2px border = 18px) agar tidak terpotong
+  const svgWidth = Math.max(220, width - 18);
+  const pad = width <= 350 ? 30 : 42;
+  const svgSize = { width: svgWidth, height, padding: pad };
 
-  // ── Tahap 1: Kemunculan Grid & Sumbu (Frame 0+) ──
+  // ── Tahap 1..5: Mode Terkontrol (Sinkron 1:1) vs Mode Otonom (Legacy) ──
   const gridSpring = spring({
     frame: relFrame,
     fps,
     config: { damping: 15, stiffness: 80 },
   });
 
-  // ── Tahap 2: Kemunculan Titik Potong Sumbu (Frame 18+) ──
-  const interceptsSpring = spring({
-    frame: relFrame - 18,
-    fps,
-    config: { damping: 14, stiffness: 100 },
-  });
+  const interceptsSpring = isControlled
+    ? activeStep === 2
+      ? spring({ frame: stepLocalFrame, fps, config: { damping: 14, stiffness: 100 } })
+      : activeStep > 2
+      ? 1
+      : 0
+    : spring({
+        frame: Math.max(0, relFrame - 18),
+        fps,
+        config: { damping: 14, stiffness: 100 },
+      });
 
-  // ── Tahap 3: Penarikan Garis Pembatas (Frame 35+) ──
-  const lineSpring = spring({
-    frame: relFrame - 35,
-    fps,
-    config: { damping: 18, stiffness: 60 },
-  });
+  const lineSpring = isControlled
+    ? activeStep === 3
+      ? spring({ frame: stepLocalFrame, fps, config: { damping: 18, stiffness: 55 } })
+      : activeStep > 3
+      ? 1
+      : 0
+    : spring({
+        frame: Math.max(0, relFrame - 35),
+        fps,
+        config: { damping: 18, stiffness: 60 },
+      });
 
-  // ── Tahap 4: Uji Titik (0,0) & Lencana (Frame 60+) ──
-  const testSpring = spring({
-    frame: relFrame - 60,
-    fps,
-    config: { damping: 15, stiffness: 90 },
-  });
+  const testSpring = isControlled
+    ? activeStep === 4
+      ? spring({ frame: stepLocalFrame, fps, config: { damping: 15, stiffness: 90 } })
+      : activeStep > 4
+      ? 1
+      : 0
+    : spring({
+        frame: Math.max(0, relFrame - 60),
+        fps,
+        config: { damping: 15, stiffness: 90 },
+      });
 
-  // ── Tahap 5: Arsiran Poligon DHP (Frame 85+) ──
-  const dhpSpring = spring({
-    frame: relFrame - 85,
-    fps,
-    config: { damping: 16, stiffness: 60 },
-  });
+  const dhpSpring = isControlled
+    ? activeStep >= 5
+      ? spring({ frame: stepLocalFrame, fps, config: { damping: 16, stiffness: 60 } })
+      : 0
+    : spring({
+        frame: Math.max(0, relFrame - 85),
+        fps,
+        config: { damping: 16, stiffness: 60 },
+      });
 
   // Pemetaan Garis Pembatas dalam Viewport
   const p1Svg = mapMathToSvg(lineSegmentInViewport[0], viewport, svgSize);
@@ -99,7 +128,7 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
 
   const animatedLineP2X = interpolate(lineSpring, [0, 1], [p1Svg[0], p2Svg[0]]);
   const animatedLineP2Y = interpolate(lineSpring, [0, 1], [p1Svg[1], p2Svg[1]]);
-  const strokeDashoffset = lineLength * (1 - lineSpring);
+  const solidDashoffset = lineLength * (1 - lineSpring);
 
   // Pemetaan Titik Potong
   const yInterceptSvg = intercepts ? mapMathToSvg(intercepts.yAxis, viewport, svgSize) : null;
@@ -109,7 +138,7 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
   const originSvg = mapMathToSvg([0, 0], viewport, svgSize);
 
   // Animasi Ping / Ripple pada Titik Uji
-  const pingLoop = ((relFrame % 30) / 30);
+  const pingLoop = (relFrame % 30) / 30;
   const rippleScale = interpolate(pingLoop, [0, 1], [1, 2.8]);
   const rippleOpacity = interpolate(pingLoop, [0, 0.7, 1], [0.8, 0.3, 0]);
 
@@ -130,65 +159,83 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
     if (y !== 0) yTicks.push(y);
   }
 
+  const showTestBadge = Boolean(
+    testOrigin && (isControlled ? activeStep >= 4 : testSpring > 0.1)
+  );
+
   return (
     <div
-      className={`relative flex flex-col items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900/95 p-3 shadow-2xl backdrop-blur-md ${className}`}
+      className={`relative flex flex-col items-center justify-center rounded-xl border border-slate-700/80 bg-slate-900/95 p-2 shadow-2xl backdrop-blur-md ${className}`}
       style={{
         width,
+        maxWidth: '100%',
+        boxSizing: 'border-box',
         backgroundColor: '#0f172a',
         borderColor: '#334155',
         boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
         ...style,
       }}
     >
-      {/* Header Info Persamaan Garis & Uji Titik */}
-      <div className="mb-2 flex w-full items-center justify-between px-2 text-xs">
+      {/* Header 2-Baris Rapi Anti-Break & Badge Uji Titik Anti-Spoiler */}
+      <div className="mb-1.5 flex w-full items-center justify-between gap-2 px-1 min-h-[34px]">
         {lineEquationLatex && (
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] font-semibold text-slate-400">Garis:</span>
-            <span
-              className="rounded px-2 py-0.5 text-xs font-mono font-bold"
-              style={{
-                backgroundColor: 'rgba(30, 41, 59, 0.9)',
-                color: lineColor,
-                border: `1px solid ${lineColor}40`,
-              }}
-            >
-              <MathFormula math={lineEquationLatex} fontSize={12} color={lineColor} />
-            </span>
-            <span className="text-[10px] text-slate-500">
-              ({lineStyle === 'solid' ? 'Garis Utuh ≤/≥' : 'Putus-putus </>'})
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <div className="flex items-center gap-1.5" style={{ whiteSpace: 'nowrap' }}>
+              <span className="text-[10px] font-semibold text-slate-400">Garis:</span>
+              <span
+                className="rounded px-1.5 py-0.5 text-[11px] font-mono font-bold"
+                style={{
+                  backgroundColor: 'rgba(30, 41, 59, 0.9)',
+                  color: lineColor,
+                  border: `1px solid ${lineColor}40`,
+                }}
+              >
+                <MathFormula math={lineEquationLatex} fontSize={11} color={lineColor} />
+              </span>
+            </div>
+            <span className="text-[9px] text-slate-400" style={{ whiteSpace: 'nowrap' }}>
+              {lineStyle === 'solid'
+                ? 'Garis Utuh / Solid (≤ atau ≥)'
+                : 'Garis Putus-putus / Dashed (< atau >)'}
             </span>
           </div>
         )}
 
-        {testOrigin && testSpring > 0.1 && (
-          <div
-            className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide"
-            style={{
-              opacity: testSpring,
-              transform: `scale(${testSpring})`,
-              backgroundColor: testOrigin.isTrue ? 'rgba(16, 185, 129, 0.2)' : 'rgba(244, 63, 94, 0.2)',
-              color: testOrigin.isTrue ? '#34d399' : '#fca5a5',
-              border: `1px solid ${testOrigin.isTrue ? '#10b981' : '#f43f5e'}`,
-            }}
-          >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: testOrigin.isTrue ? '#10b981' : '#f43f5e' }} />
-            {testOrigin.badgeLabel}
-          </div>
-        )}
+        <div className="shrink-0 flex items-center justify-end">
+          {testOrigin && (
+            <div
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-bold tracking-wide"
+              style={{
+                whiteSpace: 'nowrap',
+                opacity: showTestBadge ? testSpring : 0,
+                transform: `scale(${showTestBadge ? testSpring : 0.85})`,
+                backgroundColor: testOrigin.isTrue
+                  ? 'rgba(16, 185, 129, 0.2)'
+                  : 'rgba(244, 63, 94, 0.2)',
+                color: testOrigin.isTrue ? '#34d399' : '#fecdd3',
+                border: `1px solid ${testOrigin.isTrue ? '#10b981' : '#f43f5e'}`,
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full shrink-0"
+                style={{ backgroundColor: testOrigin.isTrue ? '#10b981' : '#f43f5e' }}
+              />
+              {testOrigin.badgeLabel}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Kanvas SVG Kartesius 2D */}
       <svg
-        width={width}
+        width={svgWidth}
         height={height}
-        viewBox={`0 0 ${width} ${height}`}
-        style={{ overflow: 'hidden', borderRadius: 8, backgroundColor: '#0b1329' }}
+        viewBox={`0 0 ${svgWidth} ${height}`}
+        style={{ overflow: 'hidden', borderRadius: 8, backgroundColor: '#0b1329', display: 'block' }}
       >
         <defs>
-          <clipPath id={`viewport-clip-${width}-${height}`}>
-            <rect x={pad} y={pad} width={width - pad * 2} height={height - pad * 2} rx={4} />
+          <clipPath id={clipId}>
+            <rect x={pad} y={pad} width={svgWidth - pad * 2} height={height - pad * 2} rx={4} />
           </clipPath>
         </defs>
 
@@ -216,7 +263,7 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
                 key={`gy-${y}`}
                 x1={pad}
                 y1={sy}
-                x2={width - pad}
+                x2={svgWidth - pad}
                 y2={sy}
                 stroke="#334155"
                 strokeWidth="1"
@@ -227,15 +274,34 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
         </g>
 
         {/* Area Terpotong Dalam Viewport */}
-        <g clipPath={`url(#viewport-clip-${width}-${height})`}>
-          {/* Layer Polygons Bertahap (Khusus Sistem PtLDV) */}
+        <g clipPath={`url(#${clipId})`}>
+          {/* Layer Polygons Bertahap (Khusus Sistem PtLDV Soal 5) */}
           {layerPolygons &&
             layerPolygons.map((layer, idx) => {
-              const layerSpring = spring({
-                frame: relFrame - (40 + idx * 12),
-                fps,
-                config: { damping: 16, stiffness: 70 },
-              });
+              let layerOpacity = 0;
+              if (isControlled && isSystemMode) {
+                if (idx < 2) {
+                  // Lapisan x >= 0 & y >= 0 tampil ringan sejak Step 1, meredup saat Step 5
+                  const step1Spring =
+                    activeStep === 1
+                      ? spring({ frame: stepLocalFrame, fps, config: { damping: 16, stiffness: 75 } })
+                      : 1;
+                  layerOpacity = activeStep >= 5 ? 0.35 : step1Spring * 0.85;
+                } else {
+                  // Lapisan ke-3 (x + y >= 4) muncul saat Step 5 sebelum irisan tajam DHP
+                  layerOpacity = activeStep >= 5 ? dhpSpring * 0.9 : 0;
+                }
+              } else {
+                const legacyLayerSpring = spring({
+                  frame: Math.max(0, relFrame - (40 + idx * 12)),
+                  fps,
+                  config: { damping: 16, stiffness: 70 },
+                });
+                layerOpacity = legacyLayerSpring * 0.45;
+              }
+
+              if (layerOpacity <= 0.01) return null;
+
               const pts = layer.polygon
                 .map((pt) => mapMathToSvg(pt, viewport, svgSize).join(','))
                 .join(' ');
@@ -244,34 +310,42 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
                   key={layer.label || idx}
                   points={pts}
                   fill={layer.color}
-                  opacity={layerSpring * 0.18}
+                  opacity={layerOpacity}
                 />
               );
             })}
 
           {/* 5. Arsiran Daerah Himpunan Penyelesaian (DHP) Penuh */}
           {dhpSpring > 0.01 && (
-            <polygon
-              points={dhpSvgPoints}
-              fill={dhpColor}
-              opacity={dhpSpring}
-            />
+            <polygon points={dhpSvgPoints} fill={dhpColor} opacity={dhpSpring} />
           )}
 
           {/* 3. Garis Pembatas (Solid / Dashed) Direntangkan Sesuai lineSegmentInViewport */}
-          {lineSpring > 0.02 && (
-            <line
-              x1={p1Svg[0]}
-              y1={p1Svg[1]}
-              x2={animatedLineP2X}
-              y2={animatedLineP2Y}
-              stroke={lineColor}
-              strokeWidth="3.5"
-              strokeDasharray={lineStyle === 'dashed' ? '8 6' : undefined}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-            />
-          )}
+          {lineSpring > 0.02 &&
+            (lineStyle === 'dashed' ? (
+              <line
+                x1={p1Svg[0]}
+                y1={p1Svg[1]}
+                x2={animatedLineP2X}
+                y2={animatedLineP2Y}
+                stroke={lineColor}
+                strokeWidth="3.5"
+                strokeDasharray="8 6"
+                strokeLinecap="butt"
+              />
+            ) : (
+              <line
+                x1={p1Svg[0]}
+                y1={p1Svg[1]}
+                x2={p2Svg[0]}
+                y2={p2Svg[1]}
+                stroke={lineColor}
+                strokeWidth="3.5"
+                strokeDasharray={lineLength}
+                strokeDashoffset={solidDashoffset}
+                strokeLinecap="round"
+              />
+            ))}
         </g>
 
         {/* Sumbu X & Sumbu Y Utama */}
@@ -280,13 +354,13 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
           <line
             x1={pad - 12}
             y1={originSvg[1]}
-            x2={width - pad + 12}
+            x2={svgWidth - pad + 12}
             y2={originSvg[1]}
             stroke="#94a3b8"
             strokeWidth="2"
           />
           <text
-            x={width - pad + 16}
+            x={svgWidth - pad + 16}
             y={originSvg[1] + 4}
             fontSize="12"
             fontWeight="bold"
@@ -369,8 +443,8 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
             {yInterceptSvg && (
               <g transform={`translate(${yInterceptSvg[0]}, ${yInterceptSvg[1]})`}>
                 <circle cx={0} cy={0} r={5.5} fill="#fbbf24" stroke="#0f172a" strokeWidth="2" />
-                <rect x={8} y={-16} width={42} height={16} rx={3} fill="#1e293b" stroke="#fbbf24" strokeWidth="1" />
-                <text x={29} y={-4} textAnchor="middle" fontSize="9" fontWeight="bold" fill="#fbbf24" fontFamily="Inter, sans-serif">
+                <rect x={8} y={-16} width={44} height={16} rx={3} fill="#1e293b" stroke="#fbbf24" strokeWidth="1" />
+                <text x={30} y={-4} textAnchor="middle" fontSize="9" fontWeight="bold" fill="#fbbf24" fontFamily="Inter, sans-serif">
                   ({intercepts.yAxis[0]},{intercepts.yAxis[1]})
                 </text>
               </g>
@@ -380,7 +454,7 @@ export const CartesianPlane2D: React.FC<CartesianPlane2DProps> = React.memo(({
             {xInterceptSvg && (
               <g transform={`translate(${xInterceptSvg[0]}, ${xInterceptSvg[1]})`}>
                 <circle cx={0} cy={0} r={5.5} fill="#fbbf24" stroke="#0f172a" strokeWidth="2" />
-                <rect x={-21} y={10} width={42} height={16} rx={3} fill="#1e293b" stroke="#fbbf24" strokeWidth="1" />
+                <rect x={-22} y={10} width={44} height={16} rx={3} fill="#1e293b" stroke="#fbbf24" strokeWidth="1" />
                 <text x={0} y={22} textAnchor="middle" fontSize="9" fontWeight="bold" fill="#fbbf24" fontFamily="Inter, sans-serif">
                   ({intercepts.xAxis[0]},{intercepts.xAxis[1]})
                 </text>

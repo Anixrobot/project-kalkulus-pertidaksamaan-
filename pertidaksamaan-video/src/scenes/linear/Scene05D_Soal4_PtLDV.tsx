@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCurrentFrame, useVideoConfig } from 'remotion';
+import { useCurrentFrame, useVideoConfig, spring } from 'remotion';
 import { SmartboardShell } from '../../components/math-v4/SmartboardShell';
 import { MathFormula } from '../../components/math-v4/MathFormula';
 import { CartesianPlane2D } from '../../components/math-v4/CartesianPlane2D';
@@ -13,24 +13,53 @@ export interface LinearSceneProps {
 /**
  * Scene05D_Soal4_PtLDV
  * Pembahasan Soal 4: 4x - 3y > 12 (Garis Putus-putus Dashed & Uji Asal SALAH)
- * Memastikan area x < 3 di bawah garis ikut terarsir penuh via dhpPolygon.
+ * Sinkron 1:1 dengan CartesianPlane2D 5 tahap & anti-spoiler kesimpulan.
  */
 export const Scene05D_Soal4_PtLDV: React.FC<LinearSceneProps> = () => {
   const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
+  const { durationInFrames, fps } = useVideoConfig();
 
   const prob = PTLDV_DATA[1]; // soal-4 (4x - 3y > 12)
 
   const steps = [
-    { latex: '4x - 3y = 12', note: 'Ubah ke persamaan garis pembatas' },
-    { latex: '(0, -4) \\;\\text{dan}\\; (3, 0)', note: 'Titik potong sumbu: x=0 -> y=-4, y=0 -> x=3' },
-    { latex: '\\text{Garis Putus-putus (Dashed) } >', note: 'Tanda ketat (>): titik pada garis tidak ikut solusi' },
-    { latex: '4(0) - 3(0) > 12 \\implies 0 > 12 \\; (\\text{SALAH})', note: 'Uji titik (0,0) menghasilkan SALAH -> arsir menjauhi (0,0)', isAlert: true },
-    { latex: '\\text{DHP: Arsir daerah kanan-bawah garis}', note: 'Arsir penuh daerah seberang menjauhi titik (0,0)' },
+    { latex: '4x - 3y = 12', note: 'Ubah tanda > menjadi = untuk garis pembatas' },
+    {
+      latex: 'x=0 \\to y=-4\\,(0,-4),\\;\\; y=0 \\to x=3\\,(3,0)',
+      note: 'Cari titik potong: x=0 -> -3y=12 (y=-4), y=0 -> 4x=12 (x=3)',
+    },
+    {
+      latex: '\\text{Garis Putus-putus (Dashed)} \\;>',
+      note: 'Tanda ketat (>): titik pada garis tidak ikut solusi',
+    },
+    {
+      latex: '4(0) - 3(0) > 12 \\implies 0 > 12 \\;(\\text{SALAH})',
+      note: 'Uji (0,0) SALAH -> arsir area seberang menjauhi (0,0)',
+      isAlert: true,
+    },
+    {
+      latex: '\\text{DHP: Daerah kanan-bawah menjauhi } (0,0)',
+      note: 'Arsir penuh sisi kanan-bawah garis (termasuk area x < 3)',
+    },
   ];
 
-  const framesPerStep = Math.max(1, Math.floor(durationInFrames / steps.length));
-  const activeStepIndex = Math.min(steps.length - 1, Math.floor(frame / framesPerStep));
+  // Langkah 1..4 mendapat porsi seimbang di 0..78%, Langkah 5 & Kesimpulan DHP di 78%..100%
+  const finalStepStart = Math.floor(durationInFrames * 0.78);
+  const framesPerStep = Math.max(1, Math.floor(finalStepStart / 4));
+  const isFinalStepReached = frame >= finalStepStart;
+  const activeStepIndex = isFinalStepReached
+    ? 4
+    : Math.min(3, Math.floor(frame / framesPerStep));
+  const stepStartFrame = isFinalStepReached
+    ? finalStepStart
+    : activeStepIndex * framesPerStep;
+
+  const conclusionSpring = isFinalStepReached
+    ? spring({
+        frame: frame - finalStepStart,
+        fps,
+        config: { damping: 14, stiffness: 85 },
+      })
+    : 0;
 
   const leftContent = (
     <div className="flex flex-col gap-1.5 w-full">
@@ -44,9 +73,9 @@ export const Scene05D_Soal4_PtLDV: React.FC<LinearSceneProps> = () => {
             {prob.subtitle}
           </span>
         </div>
-        <div className="rounded-lg bg-slate-900/90 px-2 py-1 border border-slate-700/60 flex items-center justify-between">
-          <span className="text-[10px] text-slate-400 font-semibold">Tentukan DHP dari:</span>
-          <MathFormula math={prob.problemLatex} fontSize={13} color="#f43f5e" />
+        <div className="rounded-lg bg-slate-900/90 px-2 py-1 border border-slate-700/60 flex items-center justify-between gap-2">
+          <span className="text-[10px] text-slate-400 font-semibold shrink-0">Tentukan DHP dari:</span>
+          <MathFormula math={prob.problemLatex} fontSize={12.5} color="#f43f5e" />
         </div>
       </div>
 
@@ -57,10 +86,17 @@ export const Scene05D_Soal4_PtLDV: React.FC<LinearSceneProps> = () => {
         accentColor="#f43f5e"
       />
 
-      {/* Kesimpulan DHP */}
-      <div className="rounded-xl border border-rose-500/50 bg-rose-950/20 px-2 py-1.5 text-[9.5px] text-slate-300">
-        <span className="font-bold text-rose-400">Kesimpulan DHP: </span>
-        {prob.testOrigin.conclusion}
+      {/* Kesimpulan DHP (Anti-Spoiler: tampil hanya pada Langkah 5) */}
+      <div
+        className="rounded-xl border border-rose-500/60 px-2 py-1.5 text-[9.5px] text-slate-100"
+        style={{
+          backgroundColor: '#3b1120',
+          opacity: isFinalStepReached ? conclusionSpring : 0,
+          transform: `translateY(${(1 - conclusionSpring) * 6}px)`,
+        }}
+      >
+        <span className="font-bold text-rose-300">Kesimpulan DHP: </span>
+        <span style={{ color: '#fecdd3' }}>{prob.testOrigin.conclusion}</span>
       </div>
     </div>
   );
@@ -78,8 +114,9 @@ export const Scene05D_Soal4_PtLDV: React.FC<LinearSceneProps> = () => {
         lineColor={prob.lineColor}
         dhpPolygon={prob.dhpPolygon}
         width={320}
-        height={250}
-        startFrame={0}
+        height={245}
+        activeStep={activeStepIndex + 1}
+        stepStartFrame={stepStartFrame}
       />
     </div>
   );

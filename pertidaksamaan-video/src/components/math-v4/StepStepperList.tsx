@@ -97,7 +97,7 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
               key={i}
               className={`rounded-lg px-2 py-1 flex flex-col justify-between ${
                 st.isAlert
-                  ? 'border-2 border-rose-500 bg-rose-950/35'
+                  ? 'border-2 border-rose-500'
                   : isActive
                   ? 'border-2 bg-slate-800/90'
                   : 'border border-slate-700/50 bg-slate-900/70'
@@ -105,6 +105,7 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
               style={{
                 height: CARD_HEIGHT,
                 boxSizing: 'border-box',
+                backgroundColor: st.isAlert ? '#3b1120' : undefined,
                 borderColor: st.isAlert
                   ? '#f43f5e'
                   : isActive
@@ -112,7 +113,11 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
                   : 'rgba(51, 65, 85, 0.6)',
                 opacity: isPast ? 0.55 : 1,
                 transform: `scale(${cardSpring})`,
-                boxShadow: isActive ? `0 0 12px ${accentColor}25` : undefined,
+                boxShadow: st.isAlert && isActive
+                  ? '0 0 12px rgba(244, 63, 94, 0.32)'
+                  : isActive
+                  ? `0 0 12px ${accentColor}25`
+                  : undefined,
               }}
             >
               {/* Baris Rumus Penuh di Atas (white-space: nowrap) */}
@@ -121,11 +126,18 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
                   <MathFormula
                     math={st.latex}
                     fontSize={formulaFontSize}
-                    color={st.isAlert ? '#f43f5e' : '#f8fafc'}
+                    color={st.isAlert ? '#ffffff' : '#f8fafc'}
                   />
                 </div>
                 {st.isAlert && (
-                  <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[8.5px] font-bold text-rose-400 border border-rose-500/40 shrink-0 ml-1.5">
+                  <span
+                    className="rounded px-1.5 py-0.5 text-[8.5px] font-bold shrink-0 ml-1.5"
+                    style={{
+                      backgroundColor: '#f43f5e',
+                      color: '#ffffff',
+                      border: '1px solid #fda4af',
+                    }}
+                  >
                     KRITIS!
                   </span>
                 )}
@@ -136,7 +148,7 @@ export const StepStepperList: React.FC<StepStepperListProps> = React.memo(({
                 <div
                   className="text-[9px] truncate"
                   style={{
-                    color: st.isAlert ? '#fca5a5' : '#94a3b8',
+                    color: st.isAlert ? '#fecdd3' : '#94a3b8',
                   }}
                 >
                   {st.note}

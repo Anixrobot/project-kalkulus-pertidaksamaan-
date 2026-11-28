@@ -1,6 +1,5 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
-import { MathFormula } from './MathFormula';
 
 export interface AlertRuleCardProps {
   title?: string;
@@ -12,9 +11,10 @@ export interface AlertRuleCardProps {
 }
 
 /**
- * Komponen AlertRuleCard V4.0
- * Kartu peringatan berbingkai merah (#f43f5e) dengan animasi rotasi simbol < menjadi >
- * yang sinkron dengan munculnya label operasi bilangan negatif.
+ * Komponen AlertRuleCard V4.2
+ * Kartu peringatan berbingkai merah (#f43f5e) di atas latar #3b1120 berkontras tinggi.
+ * Simbol '<' SVG murni berukuran besar berputar mulus 0deg -> 180deg menjadi '>'
+ * sinkron dengan kemunculan label ×(-) atau ÷(-), lengkap dengan caption "Arah tanda berbalik!".
  */
 export const AlertRuleCard: React.FC<AlertRuleCardProps> = React.memo(({
   title = 'ATURAN MUTLAK PERTIDAKSAMAAN',
@@ -34,52 +34,57 @@ export const AlertRuleCard: React.FC<AlertRuleCardProps> = React.memo(({
     config: { damping: 15, stiffness: 90 },
   });
 
-  // Animasi rotasi simbol 180 derajat
+  // Animasi rotasi simbol 0 -> 180 derajat
   const rotateSpring = spring({
-    frame: frame - startRotateFrame,
+    frame: Math.max(0, frame - startRotateFrame),
     fps,
-    config: { damping: 18, stiffness: 80 },
+    config: { damping: 16, stiffness: 65 },
   });
 
   const rotation = interpolate(rotateSpring, [0, 1], [0, 180]);
-  const badgeOpacity = interpolate(rotateSpring, [0, 0.4, 1], [0, 0.8, 1]);
+  const badgeOpacity = interpolate(rotateSpring, [0, 0.35, 1], [0, 0.85, 1]);
+  const captionOpacity = interpolate(rotateSpring, [0.45, 0.9, 1], [0, 0.9, 1], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
   const pulseScale = interpolate(
     Math.sin((frame / fps) * Math.PI * 2),
     [-1, 1],
-    [0.98, 1.02]
+    [0.97, 1.03]
   );
+
+  const symbolColor = rotateSpring > 0.5 ? '#ffffff' : '#fbbf24';
 
   return (
     <div
-      className={`rounded-xl border-2 border-rose-500 bg-slate-900/95 p-4 shadow-2xl backdrop-blur-md ${className}`}
+      className={`rounded-xl border-2 p-3.5 shadow-2xl ${className}`}
       style={{
         borderColor: '#f43f5e',
-        backgroundColor: 'rgba(15, 23, 42, 0.95)',
-        boxShadow: '0 10px 30px rgba(244, 63, 94, 0.25)',
-        opacity: cardSpring,
-        transform: `translateY(${(1 - cardSpring) * 16}px)`,
+        backgroundColor: '#3b1120',
+        boxShadow: '0 10px 30px rgba(244, 63, 94, 0.28)',
+        opacity: Math.max(0.2, cardSpring),
+        transform: `translateY(${(1 - cardSpring) * 12}px)`,
         ...style,
       }}
     >
       {/* Header Kartu Alert */}
-      <div className="flex items-center justify-between pb-2 border-b border-rose-500/30">
+      <div className="flex items-center justify-between pb-2 border-b border-rose-500/40 gap-2">
         <div className="flex items-center gap-2">
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-rose-500 text-xs font-black text-white shadow-md">
+          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[11px] font-black text-white shadow-md shrink-0">
             !
           </span>
           <span
-            className="text-xs font-black tracking-wider uppercase"
-            style={{ color: '#f43f5e' }}
+            className="text-[11px] font-black tracking-wider uppercase"
+            style={{ color: '#fecdd3' }}
           >
             {title}
           </span>
         </div>
         <div
-          className="rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide"
+          className="rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide shrink-0"
           style={{
-            backgroundColor: 'rgba(244, 63, 94, 0.2)',
-            color: '#fca5a5',
-            border: '1px solid rgba(244, 63, 94, 0.4)',
+            backgroundColor: '#f43f5e',
+            color: '#ffffff',
             opacity: badgeOpacity,
           }}
         >
@@ -87,41 +92,56 @@ export const AlertRuleCard: React.FC<AlertRuleCardProps> = React.memo(({
         </div>
       </div>
 
-      {/* Bagian Animasi Rotasi Simbol & Penjelasan */}
-      <div className="mt-3 flex items-center gap-4">
-        {/* Kotak Simbol Berotasi */}
-        <div
-          className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg border border-rose-500/50"
-          style={{
-            backgroundColor: 'rgba(30, 41, 59, 0.8)',
-            transform: `scale(${pulseScale})`,
-            boxShadow: 'inset 0 0 12px rgba(244, 63, 94, 0.2)',
-          }}
-        >
+      {/* Bagian Animasi Visual Rotasi Simbol '<' -> '>' 180° */}
+      <div className="mt-2.5 flex items-center gap-3.5">
+        <div className="flex flex-col items-center gap-1 shrink-0">
+          {/* Kotak Simbol Berotasi Murni */}
           <div
+            className="flex h-16 w-16 items-center justify-center rounded-xl border-2"
             style={{
-              transform: `rotate(${rotation}deg)`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              backgroundColor: '#1e0911',
+              borderColor: '#f43f5e',
+              transform: `scale(${pulseScale})`,
+              boxShadow: 'inset 0 0 14px rgba(244, 63, 94, 0.3)',
             }}
           >
-            <MathFormula
-              math="\lt"
-              fontSize={28}
-              color={rotateSpring > 0.5 ? '#f43f5e' : '#fbbf24'}
-            />
+            <div
+              style={{
+                transform: `rotate(${rotation}deg)`,
+                transformOrigin: 'center center',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 40,
+                height: 40,
+              }}
+            >
+              <svg width={36} height={36} viewBox="0 0 36 36" aria-hidden="true">
+                <path
+                  d="M 25 7 L 9 18 L 25 29"
+                  fill="none"
+                  stroke={symbolColor}
+                  strokeWidth="4.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           </div>
+          <span
+            className="text-[9.5px] font-bold text-center whitespace-nowrap"
+            style={{ color: '#fecdd3', opacity: captionOpacity }}
+          >
+            Arah tanda berbalik!
+          </span>
         </div>
 
-        {/* Transformasi Visual Tanda */}
+        {/* Penjelasan Kritis Berkualitas Kontras Tinggi */}
         <div className="flex flex-col gap-1 flex-1">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-200">
-            <span className="font-mono text-amber-400">&lt;</span>
-            <span className="text-xs text-slate-400">berputar 180° menjadi</span>
-            <span className="font-mono text-rose-400">&gt;</span>
+          <div className="text-[11px] font-bold text-white leading-snug">
+            Operasi ×(&minus;) atau ÷(&minus;) membalik ketidaksamaan
           </div>
-          <p className="text-xs leading-relaxed text-slate-300">
+          <p className="text-[10.5px] leading-relaxed" style={{ color: '#fecdd3' }}>
             {message}
           </p>
         </div>
